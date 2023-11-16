@@ -130,13 +130,14 @@ IDaaS を用いることで、一つのアカウントで様々なアプリに�
 - ログアウト
 - メールリンクログイン
 - 退会
-  そして、これら機能を実装するためのアプリの構成は以下の通りです。
-  ![monorepo-firebase.drawio.png](/images/firebase-login-spa/monorepo-firebase.drawio.png)
-  フロント側は React を使用し、バックエンド側は NestJs を使用します。
-  フロント側とバックエンド側のやりとりは ts-rest による REST API で行います。
-  そして、フロント・バックエンド側で認証に関わる部分の機能はそれぞれ Firebase が提供している API を使用して、Firebase とやり取りします。
-  以上が今回作成するアプリケーションとなります。
-  それではまず、環境構築から始めます。
+
+そして、これら機能を実装するためのアプリの構成は以下の通りです。
+![monorepo-firebase.drawio.png](/images/firebase-login-spa/monorepo-firebase.drawio.png)
+フロント側は React を使用し、バックエンド側は NestJs を使用します。
+フロント側とバックエンド側のやりとりは ts-rest による REST API で行います。
+そして、フロント・バックエンド側で認証に関わる部分の機能はそれぞれ Firebase が提供している API を使用して、Firebase とやり取りします。
+以上が今回作成するアプリケーションとなります。
+それではまず、環境構築から始めます。
 
 ## 環境構築
 
@@ -897,39 +898,40 @@ http://localhost:3000/define-api にアクセスすると、以下のような A
 
 - Firebase は認証機能の提供はしているが認証・認可サーバーは準備していない
 - Firebase は OIDC をサポートするユーザーが無料枠で月 50 人未満と少ない
-  それぞれ見ていきましょう。
-  まず一つ目についてです。
-  Firebase を Auth0 の代わりにするには以下のような構成を満たす必要があります。
-  ![**[Flutter × FirebaseAuth 自作APIの認証について](https://zenn.dev/ymktmk/articles/cc56296b096f39)から引用**](/images/firebase-login-spa/Untitled.png)
-  **[Flutter × FirebaseAuth 自作 API の認証について](https://zenn.dev/ymktmk/articles/cc56296b096f39)から引用**
-  そして、認証のフローは Auth0 から置き換えると考えるなら、OpenId Connect であることが求められます。
-  Firebase を使ってこれら構成を作成することは不可能ではありません。
-  認証の機能は揃っていますし、トークンを生成することもできます。
-  しかし、Firebase 単体で Authorization Code Flow における認可サーバーになるには、別途開発者側での実装が必要となります。
-  それを示すために、以下の図を見てください。
-  ![[Authorization Code Flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow)より引用](/images/firebase-login-spa/Untitled1.png)
-  [Authorization Code Flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow)より引用
-  Authorization Code Flow を行うには、アプリから認可サーバーへ来た/authorize へのリクエストに対して認証・認可を行い、認可コードのやり取りをした後にトークンを渡す必要があります。Firebase は上記 Authorization Code Flow で以下画像の赤枠内のみをサポートしています。※
-  ![2023-10-02_21h46_13.png](/images/firebase-login-spa/2023-10-02_21h46_13.png)
-  ※③ と ④ しかサポートしていないわけではなく、③ と ④ の全てに対応しているわけではないです。大枠で判断した結果大体 ③ と ④ の機能を担うくらいで捉えていただけると幸いです。
-  その他の機能については我々が用意するものとなっています。
-  これは Firebase Authenticate は**「認証」**機能をサポートしているが認証の結果何がしたいかは実装者に委ねているためです。
-  一方で、Auth0 は画像で示したフローを行うのに必要な機能が搭載されています。
-  Auth0 は認証に加えて認可についての機能を搭載するためです。
-  そのため、Auth0 は自由度がそこまで高くないですが、OpenId Connect を使用した認証・認可機能を使いたい場合は簡単に構築ができるようになっています。
-  Firebase でも OpenId Connect を構築するのは不可能ではないですが、考えることが多く Auth0 の代わりで使おうとすると苦しいものがあります。
-  ただ、Firebase は Identity Platform と連携を行うことで OpenId Connect を使用した認証はできます。
-  なら、Firebase でも良さそうに思えますが二つ目の理由がそれを阻みます。
-  それは OpenId Connect を使用する場合、無料で使用できるのが月 50 人未満までとなっています。
-  この 50 人とはアクティブユーザーのことを指しており、Identity Platform が定義するアクティブユーザーは月の中で一回でもログインしたユーザーとなっています。([参考資料](https://cloud.google.com/identity-platform/pricing?hl=ja))
-  あまりに少ないとまでは言いませんが、少し心もとないです。
-  一方で、Auth0 は合計 7000 人までのアクティブユーザーであれば無料で使用することができます。
-  なお、Auth0 におけるアクティブユーザーは[こちら](https://community.auth0.com/t/what-is-meant-my-monthly-active-users-for-auth0/104447/5)や[こちら](https://portal.saatisfy.jp/hc/ja/articles/900006396623-Auth0%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8BMAU%E3%81%AE%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E6%96%B9%E6%B3%95)の資料を確認する限り Firebase と同様、概ね一か月の間にログインしたユーザーと認識して良さそうです。
-  このように料金体系が異なることから、Auth0 の代わりに Firebase へ乗り換えることをした場合予期せぬ料金が生じるかもしれません。
-  お金の面でも、簡単に乗り換えるといったことは考えることが多く難しそうです。
-  以上 Firebase は Auth0 の代わりにならない理由を記載しました。
-  注意点として、私の Firebase の理解はまだまだ全然浅い初心者です。
-  そのため、今回は Auth0 の代わりにならないとしましたが、もしかすると他の機能で対応できる可能性はあるので、話半分で読んでいただけると幸いです。
+
+それぞれ見ていきましょう。
+まず一つ目についてです。
+Firebase を Auth0 の代わりにするには以下のような構成を満たす必要があります。
+![**[Flutter × FirebaseAuth 自作APIの認証について](https://zenn.dev/ymktmk/articles/cc56296b096f39)から引用**](/images/firebase-login-spa/Untitled.png)
+**[Flutter × FirebaseAuth 自作 API の認証について](https://zenn.dev/ymktmk/articles/cc56296b096f39)から引用**
+そして、認証のフローは Auth0 から置き換えると考えるなら、OpenId Connect であることが求められます。
+Firebase を使ってこれら構成を作成することは不可能ではありません。
+認証の機能は揃っていますし、トークンを生成することもできます。
+しかし、Firebase 単体で Authorization Code Flow における認可サーバーになるには、別途開発者側での実装が必要となります。
+それを示すために、以下の図を見てください。
+![[Authorization Code Flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow)より引用](/images/firebase-login-spa/Untitled1.png)
+[Authorization Code Flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow)より引用
+Authorization Code Flow を行うには、アプリから認可サーバーへ来た/authorize へのリクエストに対して認証・認可を行い、認可コードのやり取りをした後にトークンを渡す必要があります。Firebase は上記 Authorization Code Flow で以下画像の赤枠内のみをサポートしています。※
+![2023-10-02_21h46_13.png](/images/firebase-login-spa/2023-10-02_21h46_13.png)
+※③ と ④ しかサポートしていないわけではなく、③ と ④ の全てに対応しているわけではないです。大枠で判断した結果大体 ③ と ④ の機能を担うくらいで捉えていただけると幸いです。
+その他の機能については我々が用意するものとなっています。
+これは Firebase Authenticate は**「認証」**機能をサポートしているが認証の結果何がしたいかは実装者に委ねているためです。
+一方で、Auth0 は画像で示したフローを行うのに必要な機能が搭載されています。
+Auth0 は認証に加えて認可についての機能を搭載するためです。
+そのため、Auth0 は自由度がそこまで高くないですが、OpenId Connect を使用した認証・認可機能を使いたい場合は簡単に構築ができるようになっています。
+Firebase でも OpenId Connect を構築するのは不可能ではないですが、考えることが多く Auth0 の代わりで使おうとすると苦しいものがあります。
+ただ、Firebase は Identity Platform と連携を行うことで OpenId Connect を使用した認証はできます。
+なら、Firebase でも良さそうに思えますが二つ目の理由がそれを阻みます。
+それは OpenId Connect を使用する場合、無料で使用できるのが月 50 人未満までとなっています。
+この 50 人とはアクティブユーザーのことを指しており、Identity Platform が定義するアクティブユーザーは月の中で一回でもログインしたユーザーとなっています。([参考資料](https://cloud.google.com/identity-platform/pricing?hl=ja))
+あまりに少ないとまでは言いませんが、少し心もとないです。
+一方で、Auth0 は合計 7000 人までのアクティブユーザーであれば無料で使用することができます。
+なお、Auth0 におけるアクティブユーザーは[こちら](https://community.auth0.com/t/what-is-meant-my-monthly-active-users-for-auth0/104447/5)や[こちら](https://portal.saatisfy.jp/hc/ja/articles/900006396623-Auth0%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8BMAU%E3%81%AE%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E6%96%B9%E6%B3%95)の資料を確認する限り Firebase と同様、概ね一か月の間にログインしたユーザーと認識して良さそうです。
+このように料金体系が異なることから、Auth0 の代わりに Firebase へ乗り換えることをした場合予期せぬ料金が生じるかもしれません。
+お金の面でも、簡単に乗り換えるといったことは考えることが多く難しそうです。
+以上 Firebase は Auth0 の代わりにならない理由を記載しました。
+注意点として、私の Firebase の理解はまだまだ全然浅い初心者です。
+そのため、今回は Auth0 の代わりにならないとしましたが、もしかすると他の機能で対応できる可能性はあるので、話半分で読んでいただけると幸いです。
 
 # おわりに
 
