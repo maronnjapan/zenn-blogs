@@ -1,5 +1,5 @@
 ---
-title: "# NestJSでのStrategyマスターに俺はなる!!!"
+title: "NestJSでのStrategyマスターに俺はなる!!!"
 emoji: "💨"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["NestJS", "passport"]
