@@ -122,7 +122,6 @@ export class AuthController {
 
 # JWT 発行処理の実装
 
-[コードをちゃんと読む！！！！！](https://github.com/nestjs/jwt/tree/master/lib)
 まず`npm install --save @nestjs/jwt`で JWT 発行に必要なモジュールをインポートします。
 そして、auth.module.ts に上記モジュールを使用するための設定をします。
 
