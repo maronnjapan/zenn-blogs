@@ -1,9 +1,9 @@
 ---
-title: ""
+title: "モノレポチックなプロジェクトで、ファイル変更を監視しながらサーバーの並列実行を行う"
 emoji: "🙆"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: []
-published: false
+topics: ["monorepo", "npm"]
+published: true
 ---
 
 # モノレポチックなプロジェクトでアプリケーションを並列実行する
