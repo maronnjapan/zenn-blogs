@@ -19,11 +19,15 @@ published: true
 
 npm workspace を使ったモノレポプロジェクトを作成する方法は[npm workspace を利用して NestJS + Create React App をモノレポ化しよう](https://note.com/shift_tech/n/nbecb007ac2ee)という良記事があるので、そちらを参照してください。
 私は上記記事を参考にして、以下のようなディレクトリ構造のプロジェクトを作成しました。
+
+```
 .
 ├── backend(NestJS) 
 ├── frontend(React)  
 └── packages
-└── ts-router(ts-rest)
+    └── ts-router(ts-rest)
+```
+
 なお、この先コードのビルドコマンドとして`npm run compile`が設定されていることを前提にして話を進めます。
 ご認識お願いします。
 
