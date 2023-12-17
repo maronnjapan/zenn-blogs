@@ -149,7 +149,7 @@ export class HeroesController {
 これで gRPC 側の準備が完了しました。
 では、BFF に入る前に動作確認をします。
 そのまま NestJS を起動してもアクセスはできないので、[evans](https://github.com/ktr0731/evans)を使います。
-`curl -OL [https://github.com/ktr0731/evans/releases/download/v0.10.11/evans_linux_amd64.tar.gz](https://github.com/ktr0731/evans/releases/download/v0.10.11/evans_linux_amd64.tar.gz)`を実行して、`tar -zxvf evans_linux_amd64.tar.gz`でファイルを解凍します。
+`curl -OL https://github.com/ktr0731/evans/releases/download/v0.10.11/evans_linux_amd64.tar.gz`を実行して、`tar -zxvf evans_linux_amd64.tar.gz`でファイルを解凍します。
 その後、`sudo mv evans /usr/bin`を実行して、パスを通します。
 `evans --host localhost -p 5000 src/hero/hero.proto`で evans ターミナルを立ち上げます。
 ![2023-12-17_00h26_04.png](/images/nestjs-nextjs-grpc-graphql/2023-12-17_00h26_04.png)
@@ -566,5 +566,5 @@ Next.js のリバースプロキシ設定
 コード自動生成
 [https://zenn.dev/monicle/articles/e427d17935d019](https://zenn.dev/monicle/articles/e427d17935d019)
 [preset が client の時の動作理解に役立った](https://zenn.dev/mh4gf/articles/graphql-codegen-client-preset)
-コード自動生成の wathc モードを有効にする(`[@parcel/watcher](https://www.npmjs.com/package/@parcel/watcher)`インストール必須)
+コード自動生成の wathc モードを有効にする([@parcel/watcher](https://www.npmjs.com/package/@parcel/watcher)インストール必須)
 [https://the-guild.dev/graphql/codegen/docs/getting-started/development-workflow#watch-mode](https://the-guild.dev/graphql/codegen/docs/getting-started/development-workflow#watch-mode)
