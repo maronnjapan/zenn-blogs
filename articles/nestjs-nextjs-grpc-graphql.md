@@ -214,17 +214,32 @@ import {
   HeroesServiceClient,
 } from "./hero/hero";
 import { ClientGrpc } from "@nestjs/microservices";
-import { Observable } from "rxjs";
+import { Observable, lastValueFrom } from "rxjs";
+import { adjustRpcResponse } from "./utils/convertObservableToPromise";
+
 @Injectable()
 export class AppService implements OnModuleInit {
   private heroesService: HeroesServiceClient;
+
   constructor(@Inject(HERO_PACKAGE_NAME) private client: ClientGrpc) {}
+
   onModuleInit() {
     this.heroesService =
       this.client.getService<HeroesServiceClient>(HEROES_SERVICE_NAME);
   }
-  getHero(): Observable<Hero> {
-    return this.heroesService.findOne({ id: 1 });
+
+  async getHero() {
+    return await this.adjustRpcResponse<Hero>(
+      this.heroesService.findOne({ id: 1 })
+    );
+  }
+
+  private async adjustRpcResponse<T>(response: Observable<T>): Promise<T> {
+    try {
+      return await lastValueFrom(response);
+    } catch (e) {
+      throw e;
+    }
   }
 }
 ```
@@ -303,17 +318,14 @@ autoSchemaFile プロパティについては、スキーマファイルを生�
 リゾルバーの戻り値を定義するためのモデルを作成するために、app.model.ts を作り以下のコードを実装します。
 
 ```tsx
-import { Query, Resolver } from "@nestjs/graphql";
-import { AppModel } from "./app.model";
-import { AppService } from "./app.service";
-@Resolver((of) => AppModel)
-export class AppResolver {
-  constructor(private appService: AppService) {}
-  @Query(() => AppModel, { name: "apps" })
-  async getHero(): Promise<AppModel> {
-    const hero = await this.appService.getHero();
-    return { id: hero.id, name: hero.name };
-  }
+import { Field, ObjectType } from "@nestjs/graphql";
+
+@ObjectType()
+export class AppModel {
+  @Field((type) => Number)
+  id: number;
+  @Field((type) => String)
+  name: string;
 }
 ```
 
