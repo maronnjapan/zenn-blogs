@@ -978,7 +978,7 @@ const newIndex = items.findIndex((item) => item.id === over?.id);
 
 なお、over プロパティですが`setNodeRef`が設定されている一番上の要素の値を取得します。
 そのため以下のような要素があった場合、要素 ② の上でドラック要素を離したら over プロパティは要素 ② の値を取得します。
-![setNodeRef.drawio.png](</images/drag-and-drop-by-dnd-kit/setNodeRef.drawio_(1).png>)
+![setNodeRef.drawio.png](/images/drag-and-drop-by-dnd-kit/setNodeRef.drawio.png)
 一方で、要素 ③ でドラック要素を離したとしても、`setNodeRef`はないため over プロパティは要素 ③ の値を取得しません。
 その代わり、要素 ③ を囲っている要素 ① は`setNodeRef`が設定されているので、over プロパティは要素 ① の値を取得します。
 よって、以下のコードはドラック要素がドロップした領域にいたソート可能な要素の index 番号に移動させ、該当の index 番号以降にある要素は一つずつ index 番号が増えることによって並べ替えが行われていると理解できます。
