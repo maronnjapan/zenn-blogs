@@ -2,7 +2,7 @@
 title: "テストを考えるとts-restを使うのを断念したけど、対応策みたいなのもあってどうしようか悩ましいという話"
 emoji: "🐷"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["tshyphenrest", "jest"]
+topics: ["ts-rest", "jest"]
 published: true
 ---
 
