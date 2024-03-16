@@ -159,4 +159,4 @@ Confidential Client と Public Client の違いを見てきましたが、Confid
 
 [The OAuth 2.0 Authorization Framework](https://openid-foundation-japan.github.io/rfc6749.ja.html)
 [OAuth 2.0 クライアント認証](https://qiita.com/TakahikoKawasaki/items/63ed4a9d8d6e5109e401)
-[OAuth 徹底入門 セキュアな認可システムを適用するための原則と実践](https://amzn.to/3IZo7Ln)
+[](https://amzn.to/3IZo7Ln)
