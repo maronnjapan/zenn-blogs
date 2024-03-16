@@ -159,4 +159,4 @@ Confidential Client と Public Client の違いを見てきましたが、Confid
 
 @[card](https://openid-foundation-japan.github.io/rfc6749.ja.html)
 @[card](https://qiita.com/TakahikoKawasaki/items/63ed4a9d8d6e5109e401)
-@[card](https://amzn.to/3IZo7Ln)
+@[card](https://www.amazon.co.jp/OAuth%E5%BE%B9%E5%BA%95%E5%85%A5%E9%96%80-%E3%82%BB%E3%82%AD%E3%83%A5%E3%82%A2%E3%81%AA%E8%AA%8D%E5%8F%AF%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E3%82%92%E9%81%A9%E7%94%A8%E3%81%99%E3%82%8B%E3%81%9F%E3%82%81%E3%81%AE%E5%8E%9F%E5%89%87%E3%81%A8%E5%AE%9F%E8%B7%B5-Justin-Riche-ebook/dp/B07L5M7DXS?&linkCode=ll1&tag=maronn0f-22&linkId=79a55dc82cc39d52829040ac209a27b1&language=ja_JP&ref_=as_li_ss_tl)
