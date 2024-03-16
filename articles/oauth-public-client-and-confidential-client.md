@@ -160,4 +160,3 @@ Confidential Client と Public Client の違いを見てきましたが、Confid
 @[card](https://openid-foundation-japan.github.io/rfc6749.ja.html)
 @[card](https://qiita.com/TakahikoKawasaki/items/63ed4a9d8d6e5109e401)
 https://www.shoeisha.co.jp/book/detail/9784798159294
-@[card]([OAuth 徹底入門 セキュアな認可システムを適用するための原則と実践](https://amzn.to/4aasU7W))
