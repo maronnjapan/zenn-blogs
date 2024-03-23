@@ -108,7 +108,7 @@ Public Client の逆ですね。
 Public Client がソースコードを閲覧でき、認証情報を探し出せてしまうのに対して、Confidential Client はバックエンド側のアプリなどで第三者が認証情報を確認するのが困難なアプリとなっています。
 Client なのにバックエンドとはどういうことだと思われるかもしれませんが、OAuth においては Resource server にアクセスするアプリを Client とします。
 例えば、以下のような構成があるとします。
-![oauth.png](/images/oauth-public-client-and-confidential-client//oauth.png)
+![oauth.png](/images/oauth-public-client-and-confidential-client/oauth.png)
 BFF は Backend For Frontend の略称なので、バックエンド側のアプリケーションとなります。
 しかし、認可サーバーとのやり取り自体は BFF が行っているため、OAuth の範囲では BFF が Client という扱いになります。
 Client = Frontend ではないので、認証情報を機密保持できるクライアントが存在可能であり、Confidential Client という概念が存在します。
