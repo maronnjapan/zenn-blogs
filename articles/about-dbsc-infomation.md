@@ -47,7 +47,7 @@ DBSC はデバイスごと固有の鍵を使用し Cookie の発行サイクル�
 ## DBSC のフロー
 
 DBSC に関わる全体的なフローは以下のとおりになります。
-![**[Device Bound Session Credentials explainer](https://github.com/WICG/dbsc/blob/main/README.md) より引用**](/images/about-dbsc/Untitled.png)
+![**[Device Bound Session Credentials explainer](https://github.com/WICG/dbsc/blob/main/README.md) より引用**](/images/about-dbsc-infomation/Untitled.png)
 **[Device Bound Session Credentials explainer](https://github.com/WICG/dbsc/blob/main/README.md) より引用**
 この中でセッションの登録と維持について見ていきます。
 なお、この図の中にある TPM は Trusted Platform Module の略称で、データの暗号化・復号や鍵ペアの生成、ハッシュ値の計算、デジタル署名の生成・検証などの機能を有する半導体だと思ってください。
