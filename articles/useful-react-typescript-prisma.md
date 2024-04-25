@@ -74,7 +74,6 @@ export default function Page() {
 
 これを画面で確認すると以下のようになります。
 ![btn-click.gif](/images/useful-react-typescript-prisma/btn-click.gif)
-![btn-click.gif](/images/useful-react-typescript-prisma/btn-click%201.gif)
 ちゃんとレンダリングされていそうですね。
 是非とも試してみてください。
 **参考資料**
