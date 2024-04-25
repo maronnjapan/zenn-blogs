@@ -113,7 +113,7 @@ const filterList = list.filter((l): l is string => l !== undefined);
 早速試してみましょう。
 以下 Typescript の Playground をみてください。
 [https://www.typescriptlang.org/play?ts=5.5.0-dev.20240424#code/MYewdgzgLgBANgS2jAvDA2gcigU2gRkwBoYBXMAExwDMEwcKTs8oAmTAXQChRJZa4uAE4AZJLDSJoAOgHCAFHFQA+eDACEKNOSq16FAJQBuIA](https://www.typescriptlang.org/play?ts=5.5.0-dev.20240424#code/MYewdgzgLgBANgS2jAvDA2gcigU2gRkwBoYBXMAExwDMEwcKTs8oAmTAXQChRJZa4uAE4AZJLDSJoAOgHCAFHFQA+eDACEKNOSq16FAJQBuIA)
-変数 filterList へホバーすると、なんと型ガードやアサーションをしていないのに
+変数 filterList へホバーすると、なんと型ガードやアサーションをしていないのに undefined が除去されています。
 ![2024-04-25_00h27_20.png](/images/useful-react-typescript-prisma/2024-04-25_00h27_20.png)
 これは感動ものですね。
 今後は filter 関数による値除去がよりはかどりそうです。
