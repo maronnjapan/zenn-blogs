@@ -123,6 +123,10 @@ const filterList = list.filter((l): l is string => l !== undefined);
 
 ### オブジェクトのプロパティについて順番の整合性を担保できるようになった
 
+(追記)コメントでご指摘いただいたように、この機能はエイプリルフールだったようです。ジョークの情報を紹介してしまい、申し訳ございません。  
+該当コンテンツはそのまま掲載しておきますが、堂々と表示されているのも恥ずかしいのでトグルに閉じ込めさせていただきます。
+
+:::details エイプリルフールだった内容について
 typescript は以下のように型定義を行い、プロパティを制限することができます。
 
 ```tsx
@@ -179,6 +183,7 @@ const b: Test = { y: 1, x: 2, z: 3 };
 **参考資料**
 [https://qiita.com/uhyo/items/787a475bb618811d3771](https://qiita.com/uhyo/items/787a475bb618811d3771)
 [https://github.com/microsoft/TypeScript/issues/58019](https://github.com/microsoft/TypeScript/issues/58019)
+:::
 
 ## 型定義から Zod のスキーマを作る時いい感じに補完など効かせてほしい
 
