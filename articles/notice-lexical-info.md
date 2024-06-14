@@ -24,15 +24,15 @@ Lexical とは Meta 社が提供している Javascript ベースのテキスト
 この Lexical は以下の特徴があります。
 ![Untitled](/images/notice-lexical-info/Untitled.png)
 Lexical はエディタインスタンスに状態を持っており、任意の時間のデータを取り出すことができます。
-![Untitled](/images/notice-lexical-info/Untitled%201.png)
+![Untitled](/images/notice-lexical-info/Untitled1.png)
 [WCAG](https://waic.jp/translations/WCAG21/)に準拠して作られており、全ての人にとって使いやすい機能を提供しています。
-![Untitled](/images/notice-lexical-info/Untitled%202.png)
+![Untitled](/images/notice-lexical-info/Untitled2.png)
 Lexical は必要な機能だけ提供しているので、とても軽いです。
 実際に[ドキュメント](https://lexical.dev/docs/intro#:~:text=The%20core%20package%20of%20Lexical%20is%20only%2022kb%20in%20file%20size)ではコア機能のサイズは 22kb しかないと謳っています。
 これは Lexical 自身はコンポーネントや各エディタ機能そのものを多く提供しているのではなく、あくまで上記につながるインターフェースを主に提供しているためです。
 なお、機能によっては拡張したモジュールが Lexical から提供されているので、完全に一からエディタ機能を組む必要はありません。
 とはいえ、コア機能についてはインターフェースを提供することが主となっており、そのおかげでかなり軽いものになっています。
-![Untitled](/images/notice-lexical-info/Untitled%203.png)
+![Untitled](/images/notice-lexical-info/Untitled3.png)
 Javascript ベースなので、Web ブラウザはもちろん対応していますが、iOS 用の Swift にも対応しています。
 Android 系はいけるのか分かりませんでした。
 Lexical は「Fast」の機能で説明したように、コア機能は必要最低限しか提供していません。
@@ -49,7 +49,7 @@ Lexical は contentEditable な要素と接続します。
 以降の画面動作は Lexical 提供の宣言型の API 経由で行われます。
 それによって、DOM を直接書き換えることはほぼ必要なくなり、DOM 絡みのエッジケースを心配する必要がないです。
 イメージは以下の画像の通りです。
-![Untitled](/images/notice-lexical-info/Untitled%204.png)
+![Untitled](/images/notice-lexical-info/Untitled4.png)
 アプリケーションは Lexical が提供する機能は使いますが、この枠を飛び越えアプリケーションが直接 DOM とやり取りする必要は基本ないです。
 使っている身としては、Lexical が言っていることに納得感はあります。
 ただ、画面のここに出したいといった表示する位置を絶対値で定める時は Lexical の機能メインでやるのは厳しい印象です。
@@ -58,7 +58,7 @@ Lexical は contentEditable な要素と紐づいて状態を管理するので�
 なので、ドキュメント記載の通りエディタ機能は Lexical 経由のみで実装するのが最適解だと思います。
 先程 Lexical とアプリケーションの関係性を軽くみましたが、もう少し具体的なアプリケーションとの関係を見ていきます。
 まずは以下の画面を見てください。
-![Untitled](/images/notice-lexical-info/Untitled%205.png)
+![Untitled](/images/notice-lexical-info/Untitled5.png)
 主な流れは以下の通りです。
 ①contentEditable な DOM でイベントが発火する
 ②Lexical がそのイベントを受け取る
