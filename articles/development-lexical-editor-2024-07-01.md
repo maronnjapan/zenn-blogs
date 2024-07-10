@@ -610,7 +610,7 @@ export default function HoverInfo({ anchorElm }: { anchorElm: HTMLElement }) {
 
 ホバー時にメンション要素が持っている情報が出てくるコンポーネントです。
 具体的には下記の時の挙動です。
-![mention-hover-deo.gif](/images/development-lexical-editor-2024-07-01//mention-hover-deo.gif)
+![mention-hover-deo.gif](/images/development-lexical-editor-2024-07-01/mention-hover-deo.gif)
 本当は MentionNode から情報を取得し、その情報をもとに色々設定すべきなのですが、今回はべた要素を表示させています。
 概ねコードを見るとイメージは湧くかと思いますので、頑張った部分だけ言及します。
 具体的には以下の部分です。
@@ -801,7 +801,7 @@ export default function SelectsFloating({
 
 メンション機能が設定されたときに、文字列検索ができる要素を表示するようにする処理です。
 具体的には以下の挙動部分です。
-![mention-search-demo.gif](/images/development-lexical-editor-2024-07-01//mention-search-demo.gif)
+![mention-search-demo.gif](/images/development-lexical-editor-2024-07-01/mention-search-demo.gif)
 コード自体は結構ホバー要素の時と似ています。
 違う部分は以下の検索結果を選択した時にテキストを書き換える部分と
 
