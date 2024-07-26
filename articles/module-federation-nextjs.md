@@ -21,6 +21,8 @@ published: true
 # Module Federation とは
 
 Module Federation とは Javascript のコードを小さな単位に分割したもの（≒ チャンク）を提供し、それを非同期・同期でロードをすることです。
+![1677586047168.png](/images/module-federation-nextjs/1677586047168.png)  
+[Building MicroFrontends with webpack Module Federation](https://www.linkedin.com/pulse/building-microfrontends-webpack-module-federation-gaurav-sharma/) より引用
 コードをプロジェクト内にインストールするのではなく、リモートにあるコードを読むこむ形なので、必要な時に必要な形で画面を構成できます。
 そして、リモートで読むことからローカルでの挙動とオンラインでの挙動に大きな違いはありません。
 さらに Module Federation は共有するプロジェクト間でライブラリのバージョンを指定できます。
