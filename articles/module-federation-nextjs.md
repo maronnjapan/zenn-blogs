@@ -1,8 +1,8 @@
 ---
-title: "Module Federationやってみた"
+title: "Module FederationをNext.jsでやってみた"
 emoji: "⛳"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["ModuleFederation", "Next"]
+topics: ["ModuleFederation", "Next", "Javascript", "webpack"]
 published: true
 ---
 
