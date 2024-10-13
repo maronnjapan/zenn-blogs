@@ -14,7 +14,7 @@ published: true
 しかし、その理解は部分的には誤っていました。
 それを確認するために、以下のコードを見てください。
 
-```jsx
+```ts
 import { ulid } from 'ulid'
 const ids = [1, 2, 3, 4, 5, 6, 7].map(v => ({ id: v, ulid: uli() }))
 console.log(ids.sort((a, b) => {
@@ -34,7 +34,7 @@ console.log(ids.sort((a, b) => {
 元々の私の ULID への理解では、id の値が 7 となるオブジェクトが配列の最初になり、以降は 6,5,4…と降順となります。
 ですが、実際に 3 回ほど実行するとそれぞれ以下のようになります。
 
-```jsx
+```ts
 /** 実行1回目 */
 [
   { id: 3, ulid: "01J6VWSHZJYTCEMWNQ9V5VXQ80" },
@@ -75,7 +75,7 @@ console.log(ids.sort((a, b) => {
 ULID の動作が正しいかを判断するには、ULID が何者かを確認する必要があります。
 ULID は[ドキュメント](https://github.com/ulid/spec?tab=readme-ov-file#specification)を確認すると以下のように構成されています。
 
-```jsx
+```ts
  01AN4Z07BY      79KA1307SR9X4MV3
 |----------|    |----------------|
  Timestamp          Randomness
@@ -134,7 +134,7 @@ ULID がソートできるのは、この UNIX 時間でのソート順となる
 ただし、コードをそのまま持ってくるのではなく、理解しやすいように一部改変はしています。
 具体的には以下のコードです。
 
-```jsx
+```ts
 const ENCODING = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 export function encodeTime(now: number): string {
   let mod;
@@ -165,7 +165,7 @@ UNIX 時間は常に増加し続ける数字であることと、32 で割り続
 試しに、以下関数を好きな値を二つ入れてやってみてください。
 必ず値が大きい方数を設定した方が、右から見た時大きい値で終わっています。
 
-```jsx
+```ts
 function hoge(num: number) {
   let localNum = num;
   let str = "";
@@ -196,7 +196,7 @@ ULID はこの数値が大きいということを、辞書的に後に来る文
 for 文など、ループ処理を行うことです。
 例えば、以下のコードを実行してみると、時より出力される値が同じになります。
 
-```jsx
+```ts
 for (let i = 0; i < 5; i++) {
   console.log(Date.now());
 }
@@ -212,7 +212,7 @@ for (let i = 0; i < 5; i++) {
 このようにループ処理では、同じミリ秒で処理が完了してしまう時があります。
 先程見た[ulid/javascript](https://github.com/ulid/javascript)の factory 簡単のコードをみると、定義漏れず`Date.now()`でミリ秒の値を出力するようにデフォルトでしています。
 
-```jsx
+```ts
 export function factory(currPrng?: PRNG): ULID {
   if (!currPrng) {
     currPrng = detectPrng();
@@ -245,7 +245,7 @@ ULID 側も上記ケースは想定しているので、ドキュメントに対
 具体的には、同じミリ秒であれば、最後に生成されたランダムな文字列部分を、1 ビット増加させる形で生成すると言及しています。
 コードで見たほうがイメージ湧きやすいので、[ulid/javascript](https://github.com/ulid/javascript?tab=readme-ov-file#monotonic-ulids)で提供されている、Monotonicity な生成関数のサンプルコードを確認します。
 
-```jsx
+```ts
 import { monotonicFactory } from "ulid";
 const ulid = monotonicFactory();
 // Strict ordering for the same timestamp, by incrementing the least-significant random bit by 1
@@ -273,7 +273,7 @@ ulid(100000); // 000XAL6S41ACTAV9WEVGEMMVRD
 先程から紹介している、[ulid/javascript](https://github.com/ulid/javascript/tree/master)の monotonicFactory 関数ですが、タイムスタンプの引数を設定しない場合、あらかじめ monotonicFactory 関数を実行した状態でないとソートが担保されません。
 コードでいうと、以下の使い方をするとソートが担保された状態での生成ができません。
 
-```jsx
+```ts
 import { monotonicFactory } from "ulid";
 for (let i = 0; i < 10; i++) {
   console.log(monotonicFactory()());
@@ -282,7 +282,7 @@ for (let i = 0; i < 10; i++) {
 
 これの理由は、monotonicFactory 関数のコードを確認すると分かります。
 
-```jsx
+```ts
 export function monotonicFactory(currPrng?: PRNG): ULID {
   if (!currPrng) {
     currPrng = detectPrng();
@@ -309,7 +309,7 @@ export function monotonicFactory(currPrng?: PRNG): ULID {
 そのため、想定した挙動をしなくなります。
 対処法としては、以下のように最初に ULID を生成する関数を取り出しておくことです。
 
-```jsx
+```ts
 import { monotonicFactory } from "ulid";
 const generateUlid = monotonicFactory();
 for (let i = 0; i < 10; i++) {
