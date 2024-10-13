@@ -38,7 +38,7 @@ https://community.auth0.com/t/understanding-monthly-active-users/116379
 なんと25000人に増えました！
 最初見た時、思わず「エグッ」と言ってしまいました。
 突然の大幅増です。
-この増加によって、西日本旅客鉄道株式会社(JR西日本)単体の従業員数を超えてきました。
+この増加によって、[西日本旅客鉄道株式会社(JR西日本)](https://www.westjr.co.jp/company/info/outline/)単体の従業員数を超えてきました。
 すなわち、JR西日本単体の従業員全員が、Auth0にアカウントを登録しても、Free プラン内での使用ができます。
 凄まじいですね。
 小・中規模のサイトでは、MAUが超えるかもという心配がほぼ無くなりました。
@@ -58,7 +58,7 @@ https://community.auth0.com/t/understanding-monthly-active-users/116379
 より多くのユーザーを受けれいることができますね。
 ### ②パスワードレスログインの使用
 Authentication→Passwordlessから、パスワードレスなログインの利用を設定できるようになりました。
-![2024-10-13_12h39_10.png](/images/2024-10-13_12h39_10.png)
+![2024-10-13_12h39_10.png](/images/auth0-upgrade/2024-10-13_12h39_10.png)
 添付画像のように、SMSやメールを使ったワンタイムコードによるログインができるようになりました。
 SMSは面倒だと思っていたので、これをFreeプランで使えるのはありがたいですね。
 ### ③Oktaとの接続を無制限・Organazationを最大5個まで作成可能・アクションとフォームを最大5個まで作成
@@ -67,7 +67,7 @@ SMSは面倒だと思っていたので、これをFreeプランで使えるの�
 Organazationも機能として凄かったはずなのですが、無料プランで使えなかったので、記憶がもはやないです。
 ここら辺も、使えるようにしていきたいです。
 これまで紹介したFree プランのアップグレードをまとめたものが以下になります。
-![[Level Up: Auth0 Plans Just Got an Upgrade](https://auth0.com/blog/auth0-plans-got-an-upgrade/) より引用](/images/2024-10-13_12h47_46.png)
+![[Level Up: Auth0 Plans Just Got an Upgrade](https://auth0.com/blog/auth0-plans-got-an-upgrade/) より引用](/images/auth0-upgrade/2024-10-13_12h47_46.png)
 [Level Up: Auth0 Plans Just Got an Upgrade](https://auth0.com/blog/auth0-plans-got-an-upgrade/) より引用
 気になる機能は色々と試していきたいですね。
 ## おわりに
