@@ -1,5 +1,5 @@
 ---
-title: ""
+title: "GitLabでCIを使って、READMEに疑似コントリビューター一覧項目を設ける機能を搭載してみた"
 emoji: "👌"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["GitLab","CI"]
