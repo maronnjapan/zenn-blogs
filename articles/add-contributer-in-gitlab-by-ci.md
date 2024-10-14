@@ -226,7 +226,7 @@ MR_AUTHOR_SHOW_NAME=$(curl -s -H "PRIVATE-TOKEN: ${GITLAB_ACESS_TOKEN}" "${CI_AP
 次のif文で、「`alt=’マージリクエストを作成した人のユーザー名’`」という文字列がREADME.mdにないかをgrepコマンドで検索しています。
 もし無ければ、sedコマンドで「`<!-- CONTRIBUTORS -->`」の文字列のすぐ後に、「`[<img src='${CI_SERVER_URL}/uploads/-/system/user/avatar/${MR_AUTHOR_ID}/avatar.png' alt='${MR_AUTHOR_NAME}' width='40'>](@${MR_AUTHOR_NAME})`」を追記するようにします。
 imgタグを用いて記載することで、README.mdに任意の大きさのアイコン画像を表示させることができます。
-そして、[表示される内容](@ユーザー名)とすることで、ホバーした時に人の情報を表示することができます。
+そして、`[表示される内容](@ユーザー名)`とすることで、ホバーした時に人の情報を表示することができます。
 アカウント画像は、「使用しているGitLabのルートURL/uploads/-/system/user/avatar/ユーザーID/avatar.png」で取得できので、imgタグのsrc属性にその値を設定しています。
 後は、この変更をadd・commit・pushすることで、プロジェクトに反映させています。
 なお、pushの際に使用しているURLは[こちらのドキュメント](https://gitlab-docs.creationline.com/ee/ci/jobs/ci_job_token.html)を元に設定しています。
