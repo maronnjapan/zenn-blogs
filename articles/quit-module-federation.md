@@ -80,11 +80,11 @@ export const App = () => (
 );
 /** ReactのSuspense */
 import { Suspense } from 'react'
-export const App = ()=>{
-	<Suspense>
-		<Hoge />
-	</Suspense>
-}
+export const App = () => (
+  <Suspense>
+	<Hoge />
+  </Suspense>
+)
 ```
 なので、Typescriptで開発しているプロジェクトで当該コンポーネントをインポートする際は、`@ts-expect-error`などで明示的にエラーを回避させる必要があります。
 また、補完も効かなくなるので、propsを設定した場合はちゃんと値が適切かの責任を持つ必要があります。
