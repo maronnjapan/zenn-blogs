@@ -53,7 +53,7 @@ webpack(config, options) {
 ギリギリnext devでアプリケーションを起動できても、Module Federationで提供するコンポーネントを使用した画面にアクセスすると、Out of Memoryで落ちます。
 CIでもビルドを実行すると、メモリエラーで落ちることが多々ありました。
 これに絡んだイシューも挙がっていますが、解消方法はメモリを増強するしかないという結論になっていそうです。
-[https://github.com/module-federation/core/issues/718](https://github.com/module-federation/core/issues/718)
+https://github.com/module-federation/core/issues/718
 一応、next buildコマンドに関しては`NODE_OPTIONS=--max_old_space_size=4096 next build`とメモリ増強する形で実行すれば回避はできます。
 しかし、next devコマンドでは変わらず重いままなので、ローカルでの開発体験は変わらず厳しいです。
 このように、Module Federationを使用するとビルド周りが重くなり、開発体験が悪くなるのが理由として挙げられます。
