@@ -1,5 +1,5 @@
 ---
-title: "SPAでAuth0のライブラリを使ってログインされた際にセットされるCookieについて"
+title: "SPAでAuth0のライブラリを使ってログインした際にセットされるCookieについて"
 emoji: "📝"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Auth0","SPA","Cookie","Javascript"]
