@@ -6,6 +6,8 @@ topics: ["Auth0","SPA","Javascript","OpenID Connect","OAuth2"]
 published: true
 published_at: 2024-12-23 08:00
 ---
+この記事はDigital Identity技術勉強会 #iddance Advent Calendar 2024 23日目の記事となります。
+https://qiita.com/advent-calendar/2024/iddance
 ## 結論
 大人しく、Auth0提供のライブラリを使用するときはAuth0を使用しましょう。
 ## 出来上がったアプリケーションの挙動
