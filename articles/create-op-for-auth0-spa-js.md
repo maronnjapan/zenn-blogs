@@ -102,7 +102,7 @@ OPの実装に入る前に、クライアント側がどのようなリクエス
 次に⑥の認可コードを元に、トークンを取得するためのリクエスト値を確認します。
 ![2024-12-21_17h13_17.png](/images/create-op-for-auth0-spa-js/2024-12-21_17h13_17.png)
 トークンを取得するリクエストはPOSTなので、Form Dataになっていますね。
-stateについては、[こちら](https://openid-foundation-japan.github.io/rfc6749.ja.html#CSRF)の記載があるように、認可コードをOPからもらった後、適切なクライアントかを判定するために使用します。
+stateについては、[こちら](https://openid-foundation-japan.github.io/rfc6749.ja.html#CSRF)の記載があるように、~認可コードをOPからもらった後、適切なクライアントかを判定~認可レスポンスを受け付けるにあたって適切なセッションかどうかを判定するために使用します。
 そのため、トークンを取得するためのリクエストにstateは含めません。
 PKCEについては、OP側での検証となるのでリクエストに含まれています。
 その他、[仕様書](https://openid-foundation-japan.github.io/rfc6749.ja.html#token-req)に記載がある通り、必須のcodeとgrant_typeが存在します。
