@@ -1,5 +1,5 @@
 ---
-title: "Auth0提供のライブラリで構築されたSPAと自作OPで、トークンが発行までの流れを実装する"
+title: "Auth0提供のライブラリで構築されたSPAと自作OPで、トークンが発行されるまでの流れを実装する"
 emoji: "🐥"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Auth0","SPA","Javascript","OpenID Connect","OAuth2"]
