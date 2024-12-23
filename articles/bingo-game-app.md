@@ -199,8 +199,8 @@ export function BingoBoard({ gameId }: { gameId: string }) {
     const [numbers, setNumbers] = useState<number[]>([]);
     const [currentNumber, setCurrentNumber] = useState<number | null>(null);
     useEffect(() => 
-		    // コネクションを張るチャンネル名を指定
-				const gameChannel = pusherClient.subscribe(`bingo-game-${gameId}`);
+		// コネクションを張るチャンネル名を指定
+		const gameChannel = pusherClient.subscribe(`bingo-game-${gameId}`);
         // チャンネル内のイベントを受け取りコールバックを指定
         gameChannel.bind('new-number', (data: { number: number }) => {
             setCurrentNumber(data.number)
