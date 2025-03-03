@@ -71,7 +71,7 @@ export default defineConfig({
 ```
 こうすることで、Next.jsのpublicディレクトリにビルドした静的ファイルを配置することができます。
 では、実際にVitepressのビルドを行い、その後Next.jsを実行してみます。
-そして、http://localhost:3000/index.htmlにアクセスすると以下のような画面が表示されます。
+そして、http://localhost:3000/index.html にアクセスすると以下のような画面が表示されます。
 ![2025-02-22_12h16_03.png](/images/move-vitepress-nextjs-public-dir/2025-02-22_12h16_03.png)
 上手く表示されましたね。
 ただ、この場合publicディレクトリを見ると、既存の静的ファイルが消えています。
@@ -100,15 +100,15 @@ publicディレクトリには、画像とかもおきたいので、publicデ�
 ```
 注目すべき点はパスの設定部分です。
 基本的に、パスが/assetsから始まっています。
-publicファイルにある上記ファイルにアクセスした場合、対象のパスはhttp://localhost:3000/assets/~という形でで取得しようとします。
+publicファイルにある上記ファイルにアクセスした場合、対象のパスはhttp://localhost:3000/assets/~ という形でで取得しようとします。
 しかし、先程outDirの設定でファイルの出力はすべてpublic/docsに配置されています。
-なので、http://localhost:3000/assets/~ではなく、http://localhost:3000/docs/assets/~という形でファイルへのアクセスが必要です。
+なので、http://localhost:3000/assets/~ ではなく、http://localhost:3000/docs/assets/~ という形でファイルへのアクセスが必要です。
 このずれが、画面の表示をおかしくしていました。
 つまり、HTMLファイルにはアクセスできても、その中で読み込もうとしている他のファイルにアクセスができなかったため、表示が上手くいっていませんでした。
 よって、いい感じに表示させるには/assetsの前に/docsを足す必要がありますが、それを手動でやるのはしんどいです。
 そこで、Vitepressの設定の一つである[baseオプション](https://vitepress.dev/reference/site-config#base)を使用します。
 baseオプションはざっくりいうと、Vitepressのルートファイルにアクセスする時のパスを設定するものです。
-デフォルトは`/`なのですが、例えばドキュメントにあるようにに`/bar/`を設定すると、http://example.com/bar/にアクセスした時、Vitepressのルートファイルにアクセスするようになります。
+デフォルトは`/`なのですが、例えばドキュメントにあるようにに`/bar/`を設定すると、http://example.com/bar/ にアクセスした時、Vitepressのルートファイルにアクセスするようになります。
 そして、このbaseオプションに値を設定すると、ビルドしたファイルも    `<link rel="modulepreload" href="/bar/assets/index.md.BTKG5DAH.lean.js">`とパスの先頭に設定した値を付与します。
 この機能を今回も使用します。
 docs/.vitepress/config.mtsの設定を以下のように変更します。
@@ -121,7 +121,7 @@ export default defineConfig({
 })
 ```
 この状態で、Vitepressをビルドします。
-その後、Next.jsを起動しhttp://localhost:3000/docs/index.htmlにアクセスします。
+その後、Next.jsを起動しhttp://localhost:3000/docs/index.html にアクセスします。
 すると、以下のように画面がいい感じに表示されるようになりました。
 ![2025-02-22_12h45_14.png](/images/move-vitepress-nextjs-public-dir/2025-02-22_12h45_14.png)
 以上で、Next.jsの静的ファイルを配信するディレクトリを活用して、Vitepressで作成した画面を表示することができました。
