@@ -1,5 +1,5 @@
 ---
-title: "Node Crypto、Web Crypto API、両者合わせた3種類のパターンで、ECDSAによる秘密鍵・公開鍵の作成～署名・検証まで行う"
+title: "Node Crypto、Web Crypto APIを用いてECDSAによる秘密鍵・公開鍵の作成～署名・検証まで行う"
 emoji: "🙆"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["ECDSA","Crypto","Node"]
