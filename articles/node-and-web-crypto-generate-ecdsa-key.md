@@ -936,8 +936,8 @@ export class AppController {
 5. 署名時に秘密鍵を復号し、JWTの生成に使用
 6. 検証時に公開鍵を取得し、JWTの検証に使用
 
-## 鍵の生成と保存の実装戦略
-### Web Crypto API実装の特徴と意図
+## 鍵の生成と保存の実装
+### Web Crypto APIのみを使用した実装
 Web Crypto APIを使用した実装（`SignKeyOnlyWebCryptoApiService`）は、ブラウザやCloudflare Workers環境で動作することを想定しています。
 ```tsx
 async generateSignKeys() {
@@ -962,7 +962,7 @@ async generateSignKeys() {
 - 鍵の用途として`sign`と`verify`を明示
 
 この実装では、Web Crypto APIのネイティブな型（CryptoKey）をそのまま活用しています。
-### Node.js Crypto実装の特徴と意図
+### Node.js Cryptoのみを使用した実装
 Node.js Cryptoを使用した実装（`SignKeyOnlyNodeCryptoService`）は、NestJSといったNode.jsで動く環境での使用を想定しています。
 ```tsx
 async generateSignKeys() {
@@ -992,7 +992,7 @@ async generateSignKeys() {
 - 公開鍵をJWK形式に変換してリターン
 
 ここでは、Node.jsネイティブの鍵形式（PEM）で生成した後、必要に応じてJWK形式に変換するアプローチを取っています。
-### ハイブリッド実装のアプローチ
+### ハイブリッド実装
 ハイブリッド実装（`SignKeyNodeAndWebCryptoService`）は、Web Crypto APIで鍵を生成し、必要に応じてNode.js Cryptoで使用できる形式に変換します。
 ```tsx
 async convertPrivateWebCryptoKeyToPemKey(privateKey: CryptoKey) {
@@ -1026,7 +1026,7 @@ KIDの主な用途：
 2. JWT署名時に使用した鍵を識別するためのヘッダー情報として使用
 3. 複数の鍵ペアをローテーションするための識別子
 
-## 3. 秘密鍵の保護メカニズム詳解
+## 3. 秘密鍵の保護の実装
 ### ラッピングキー（Wrap Key）の管理手法
 すべての実装では、秘密鍵を直接保存せず、AES-GCMで暗号化してから保存しています。
 この暗号化に使用するキー（ラッピングキー）の管理も重要な部分だと考えていますので、触れていきます。
@@ -1182,7 +1182,7 @@ private encodeBase64(buf: ArrayBufferLike): string {
 
 ## 署名検証プロセスの実装
 ### 公開鍵のエクスポートと変換
-公開鍵の管理と取得は、JWKSエンドポイントを提供するための重要な要素です：
+JWKSエンドポイントを提供するために公開鍵の管理と取得はを行います：
 ```tsx
 async exportPublicKeys() {
     const alreadyExistKeys = await this.prisma.publicKey.findMany();
