@@ -10,18 +10,18 @@ published: true
 個人的に確かにと思ったことや、面白かったことを雑にまとめました。
 本来の内容とずれているかもしれないので、その点はご容赦ください。
 ### 入り口を強化しても裏口が弱かったらダメ
-https://www.youtube.com/live/dkHrfjY_Kas?si=d1UMVykao0tnliDw&t=3277
+https://www.youtube.com/live/watch?v=dkHrfjY_Kas&t=3277s
 小岩井さんがお話されていましたが、パスキー認証で正面を強固にしてもセッション取られたら、ダメというのは肝に銘じておかないといけないと思いました。
 こういった認証の話が起きると、ログインをさせないという入り口に焦点が当たりがちです。
 ですが、中に入った時のセキュリティ、例えばセッションなどを取られないようにするのは認証とセットで考えないとダメだと改めて感じました。
 セッションの話を聞いて、そういえば[Device Bound Session Credentials](https://github.com/w3c/webappsec-dbsc/blob/main/README.md)っていつ頃検証できるのだろうとも思いました。
 ### パスキープロバイダーを実は作れる
-[https://www.youtube.com/live/dkHrfjY_Kas?si=5IMnFqcCHJZnTydj&t=3376](https://www.youtube.com/live/dkHrfjY_Kas?si=5IMnFqcCHJZnTydj&t=3376)
+https://www.youtube.com/live/watch?v=dkHrfjY_Kas&t=3376s
 これは個人的にかなりワクワクしました。
 パスキープロバイダーはスケールが大きいから使うだけで、自分では作れないと思っていましたが、どうやら作れるみたいです。
 Google提供の情報から読み解いたとおっしゃっていたので、何とか自分でも探し出したいです。
 ### パスワードマネージャーしか使えないログイン画面
-https://www.youtube.com/live/dkHrfjY_Kas?si=1HVx6e1M9r6Xb8Xd&t=5084
+https://www.youtube.com/live/watch?v=dkHrfjY_Kas&t=5084s
 小ネタ的な話でしたが、パスワードマネージャーしか使用できないログイン画面はとても面白かったです。
 [伊藤さん](https://ritou.hatenablog.com/entry/2024/07/07/205407)の記事で、パスキーを普及するためにまずはパスワードマネージャーを浸透させていこうとありましたが、上記のような取り組みはすごく良いのではと思っています。
 ### アカウントリカバリーとeKYCによる懸念
