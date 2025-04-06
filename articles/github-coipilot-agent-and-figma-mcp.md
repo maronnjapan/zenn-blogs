@@ -7,6 +7,7 @@ published: true
 ---
 ## はじめに
 VSCodeのInsiders版しか使用できなかったGitHub Copilot Agenetが、先日VSCodeの安定版 v1.99でも使用できるようになりました👏
+
 https://code.visualstudio.com/updates/v1_99
 さらにMCPサーバーの設定も適用できるようになったようなので、早速試してみました。
 とはいえ、何か実装があると分かりやすいかなと思い、FigmaのMCPサーバーを設定・起動し、GitHub Copilot Agent経由でアクセスできるようにしました。
@@ -25,11 +26,11 @@ https://code.visualstudio.com/updates/v1_99
 なので、前提の4つは**必ず**設定してください。
 ## この記事の設定を行うためのダイジェスト
 以下の記事でVSCodeをアップデートする方法をチェックし
-[https://lifedaa.com/it/visual-studio-code/](https://lifedaa.com/it/visual-studio-code/)
+https://lifedaa.com/it/visual-studio-code/
 以下の記事でFigmaのMCPサーバーを設定ファイルに書く方法を知り
-[https://zenn.dev/takna/articles/mcp-server-tutorial-06-figma](https://zenn.dev/takna/articles/mcp-server-tutorial-06-figma)
+https://zenn.dev/takna/articles/mcp-server-tutorial-06-figma
 以下の記事で具体的にどのファイルのどこに書くのかを知りました
-[https://qiita.com/youtoy/items/adfeedeedf1309f194ce](https://qiita.com/youtoy/items/adfeedeedf1309f194ce)
+https://qiita.com/youtoy/items/adfeedeedf1309f194ce
 この記事は上記3つの記事によって成り立っています。
 あくまで、これらを自分の言葉でまとめたに過ぎませんので、サクッと表題の内容を構築したい場合は、各記事を参照した方が早いと思います。
 上記は認識した上でこれからの内容を読んでいただけますと幸いです。
@@ -46,7 +47,7 @@ VSCodeをアップデートしたら、GitHub Copilotのチャットを開きま
 ### 参考資料
 https://lifedaa.com/it/visual-studio-code/
 ## FigmaのMCPサーバーアクセス準備
-VSCodeでGitHub Copilot Agenetを使えるようにしたので、次にFigma内のコンポーネントへアクセスできるようにします。
+VSCodeでGitHub Copilot Agentを使えるようにしたので、次にFigma内のコンポーネントへアクセスできるようにします。
 そのためには、トークンを取得する必要があります。
 トークンを取得するために、まず[Figma](https://figma.com/)にアクセスし左上にあるアイコンをクリックしたら、「設定」をクリックします。
 ![2025-04-06_12h42_51.png](/images/github-coipilot-agent-and-figma-mcp/2025-04-06_12h42_51.png)
@@ -56,7 +57,7 @@ VSCodeでGitHub Copilot Agenetを使えるようにしたので、次にFigma内
 ![2025-04-06_12h47_39.png](/images/github-coipilot-agent-and-figma-mcp/2025-04-06_12h47_39.png)
 「トークンを生成」をクリックしたら、表示されたトークンをどこかに保持しておきます。
 ### 参考資料
-[https://zenn.dev/takna/articles/mcp-server-tutorial-06-figma](https://zenn.dev/takna/articles/mcp-server-tutorial-06-figma)
+https://zenn.dev/takna/articles/mcp-server-tutorial-06-figma
 ## FigmaのMCPサーバーの設定をVSCodeに適用する
 VSCodeとFigmaそれぞれの設定はできたので、それらを繋げる設定をします。
 なお、改めてですが私はWindows PCを使用しており、開発はWSL上で行っています。
@@ -103,7 +104,7 @@ mcpプロパティが以下のような形になっていればOKです。
 以上で設定は完了なので、実際に操作してみます。
 ### 参考資料
 https://qiita.com/youtoy/items/adfeedeedf1309f194ce
-[https://zenn.dev/takna/articles/mcp-server-tutorial-06-figma](https://zenn.dev/takna/articles/mcp-server-tutorial-06-figma)
+https://zenn.dev/takna/articles/mcp-server-tutorial-06-figma
 ## 実際に開発してもらった
 ここからは実際やってみた感想となります。
 前提として、Viteを使用してReact環境を構築しており、GitHub Copilot Agentのモデルは「Claude 3.5 Sonnet」です。
