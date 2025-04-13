@@ -148,7 +148,7 @@ export function toCSSVar<T extends Record<string, any>>(rawTheme: T) {
   return theme as WithCSSVar<T>
 }
 ```
-ここで[`analyzeBreakpoints`関数](https://github.com/chakra-ui/chakra-ui/blob/v2/packages/styled-system/src/create-theme-vars/to-css-var.ts#L40)が呼び出され、その結果が`__breakpoints`プロパティに設定されています。
+ここで[`analyzeBreakpoints`関数](https://github.com/chakra-ui/chakra-ui/blob/v2/packages/utils/src/breakpoint.ts#L56C1-L135C2)が呼び出され、その結果が`__breakpoints`プロパティに設定されています。
 この関数が今回の問題と関わりが深い部分ですので、後の章で取り扱います。
 ## （余談）useBreakpointValueが一致するBreakpointを取得する処理について
 本題から少し脱線しますが、ブレイクポイントの判定処理についても簡単に触れます。
