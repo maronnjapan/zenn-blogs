@@ -249,7 +249,7 @@ maxW = parseFloat(maxW) > 0 ? subtract(maxW) : undefined
 そのため、ソートの順序に問題があると、範囲設定も想定と異なる結果になってしまいます。
 ## 関数が受け取るbreakpointsとソートについての問題
 ここからが問題の要点です。
-`analyzeBreakpoints`関数は、[デフォルトテーマ](https://www.notion.so/Chakra-UI-V2-useBreakpointValue-1d327889392e80bfb250d2f898969fe4?pvs=21)とカスタムテーマを組み合わせたブレイクポイント設定を受け取ります。
+`analyzeBreakpoints`関数は、[デフォルトテーマ](https://v2.chakra-ui.com/docs/styled-system/customize-theme#:~:text=If%20you%27re%20curious%20as%20to%20what%20theme%20styles%20you%20can%20override%2C%20please%20reference%20the%20default%20theme%20foundation%20style%20files)とカスタムテーマを組み合わせたブレイクポイント設定を受け取ります。
 Chakra UIのデフォルトブレイクポイント設定は[こちらの定義](https://github.com/chakra-ui/chakra-ui/blob/v2/packages/theme/src/foundations/breakpoints.ts)なっています。
 ```tsx
 const breakpoints = {
