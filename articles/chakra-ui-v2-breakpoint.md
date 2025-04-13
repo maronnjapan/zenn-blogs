@@ -55,7 +55,7 @@ export function BreakPoint() {
 カスタムテーマの上書きはあくまで、一致するプロパティ部分のみ上書きするということは、この後の話に関わっているのでご認識のほどよろしくお願いします。
 ## 解消方法
 先に、解決方法をお伝えします。
-問題を解決するために必要なことは実は[ドキュメント](https://www.notion.so/OpneId-Connect-claims-1a227889392e8017b8eadf8264b854ed?pvs=21)に記載されていました。
+問題を解決するために必要なことは実は[ドキュメント](https://v2.chakra-ui.com/docs/styled-system/responsive-styles#customizing-breakpoints:~:text=Note%3A%20If%20you%27re%20using%20pixels%20as%20breakpoint%20values%20make%20sure%20to%20always%20provide%20a%20value%20for%20the%202xl%20breakpoint%2C%20which%20by%20its%20default%20pixels%20value%20is%20%221536px%22)に記載されていました。
 > Note: If you're using pixels as breakpoint values make sure to always provide a value for the 2xl breakpoint, which by its default pixels value is "1536px"
 
 ピクセル（px）を使用する場合は、sm, md, lg, xl, 2xlの**全ての**ブレイクポイント定義をextendThemeに渡す必要があります。
@@ -83,7 +83,7 @@ const breakpoints = {
 これからその理由を深掘りしていきましょう。
 問題の理由としては、Chakra UIが内部的にemを前提として処理しているため、一部のプロパティだけをpxで指定すると、ソートの順序に影響が出て、生成される@mediaクエリの範囲が想定と異なってしまうことがあげられます。
 ## useBreakpointValueからBreakpointを扱っている部分までを辿る
-まずは、[`useBreakpointValue`のソースコード](https://www.notion.so/Chakra-UI-V2-useBreakpointValue-1d327889392e80bfb250d2f898969fe4?pvs=21)の処理部分を見てみます。
+まずは、[`useBreakpointValue`のソースコード](https://github.com/chakra-ui/chakra-ui/blob/v2/packages/components/src/media-query/use-breakpoint-value.ts)の処理部分を見てみます。
 ```tsx
 export function useBreakpointValue<T = any>(
   values: Partial<Record<string, T>> | Array<T | null>,
