@@ -113,7 +113,8 @@ package.json の scripts にある dev スクリプトをを以下のように�
 
 PORT はこの後使用する側のことも考慮して変えているだけで必須の設定ではありません。
 ただし、`NEXT_PRIVATE_LOCAL_WEBPACK=true`部分は設定しないとビルドが完了できないので、必ず記載してください。
-起動したら、[http://localhost:3001/\_next/static/chunks/remoteEntry.js](https://test-module-federation-export-component.vercel.app/_next/static/chunks/remoteEntry.js)にアクセスしてください。
+起動したら、http://localhost:3001/\_next/static/chunks/remoteEntry.js
+にアクセスしてください。
 すると、以下のようなファイルが表示されます。
 
 ```tsx
