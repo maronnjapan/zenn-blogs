@@ -37,7 +37,7 @@ DBSCは仕様を確認すると、以下の記載があります。
 ## 事前準備
 まず、ローカルでDBSCを動かすための設定をします。
 ここが分からなくて、結構苦労しました。
-結論正解はchrome://flags/#enable-standard-device-bound-session-credentialsを「Enabled - Without Origin Trial tokens」とし、chrome://flags/#enable-standard-device-bound-sesssion-refresh-quotaをDisabledとする形でした。
+結論正解は[chrome://flags/#enable-standard-device-bound-session-credentials](chrome://flags/#enable-standard-device-bound-session-credentials)を`Enabled - Without Origin Trial tokens`とし、[chrome://flags/#enable-standard-device-bound-sesssion-refresh-quota](chrome://flags/#enable-standard-device-bound-sesssion-refresh-quota)を`Disabled`とする形でした。
 画像としては、以下の通りです。
 ![2025-04-28_11h06_30.png](/images/program-dbsc-app/2025-04-28_11h06_30.png)
 なお、[アナウンス記事](https://developer.chrome.com/blog/dbsc-origin-trial?hl=ja)では`chrome://flags/#device-bound-session-credentials`　とありますがこれでアクセスしても当該部分は見つけることはできないです。
