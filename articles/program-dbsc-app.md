@@ -438,6 +438,5 @@ IDaaSがまずDBSCを課金機能として導入し、そこから徐々に広�
 ## 参考資料
 https://developer.chrome.com/blog/dbsc-origin-trial?hl=ja
 https://developer.chrome.com/docs/web-platform/device-bound-session-credentials?hl=ja
-https://github.com/w3c/webappsec-dbsc/wiki/Testing-early-versions-of-DBSC
 https://github.com/w3c/webappsec-dbsc
 https://w3c.github.io/webappsec-dbsc/
