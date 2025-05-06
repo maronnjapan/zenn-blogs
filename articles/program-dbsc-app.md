@@ -15,8 +15,10 @@ https://x.com/agektmr/status/1915182340319699097
 また、DBSCを完璧に理解している人間が書いたものではないので、誤り・不足があるかと思います。
 その際はコメントいただけますと大変助かります。
 ## DBSCについて
+:::message alert
 注：あまりDBSCを私の中で咀嚼しきれていない箇所があります。
-なので、記事一番下の参考資料にて概要を把握いただけますと幸いです。
+なので、記事一番下の[参考資料](https://zenn.dev/maronn/articles/program-dbsc-app#%E5%8F%82%E8%80%83%E8%B3%87%E6%96%99)にて概要を把握いただけますと幸いです。
+:::
 実装を見ていく前に、DBSCの概要について触れていきます。
 DBSCは仕様を確認すると、以下の記載があります。
 > Device Bound Sessions Credentials (DBSC) aims to prevent hijacking via cookie theft by building a protocol and infrastructure that allows a user agent to assert possession of a securely-stored private key.
