@@ -8,7 +8,7 @@ published: true
 ## はじめに
 先日以下のツイートを見かけました。
 https://x.com/agektmr/status/1915182340319699097
-密かに待ち望んでいたDevice Bound Session Credentials(以降DBSC)のオリジントライアルが始まったとのことです。
+以前[記事](https://zenn.dev/maronn/articles/about-dbsc-infomation)も書いており、密かに待ち望んでいたDevice Bound Session Credentials(以降DBSC)のオリジントライアルが始まったとのことです。
 なので、早速実装してみたのがこの記事となります。
 なお、発表したのはオリジントライアルですが、試したのはローカル環境となります。
 オリジントライアルしているのに、デプロイしてないのかいという点はご容赦いただけますと幸いです。
