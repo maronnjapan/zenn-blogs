@@ -45,7 +45,7 @@ DBSCは仕様を確認すると、以下の記載があります。
 では早速実装の中身を解説します。
 ## DBSCを実装したコードを見る
 コード全体は以下リポジトリにあります。
-https://github.com/maronnjapan/sample-dbsc-app
+https://github.com/maronnjapan/sample-id-app/tree/no-authorization-dbsc
 全体像や動き自体は上記リポジトリをクローンしてもらうとして、この記事ではDBSCに関わるコードを見ていきます。
 前提として、DBSCを行うにはアプリケーション側にも追加で実装が必要です。
 具体的には以下の内容です。
