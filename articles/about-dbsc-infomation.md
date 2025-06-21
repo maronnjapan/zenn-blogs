@@ -2,7 +2,7 @@
 title: "Device Bound Session Credentials (DBSC)の概要や分からないことをつらつらと書く"
 emoji: "🤖"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["google", "DBSC"]
+topics: ["google","Cookie","DeviceBoundSessionCredentials","DBSC","Session"]
 published: true
 ---
 

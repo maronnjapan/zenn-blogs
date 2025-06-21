@@ -2,7 +2,7 @@
 title: "Device Bound Session Credentials(DBSC)をNext.jsで実装して検証してみた"
 emoji: "🌟"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["DeviceBoundSessionCredential","DBSC","Next.js","Cookie"]
+topics: ["DeviceBoundSessionCredentials","DBSC","Next.js","Cookie"]
 published: true
 ---
 ## はじめに
