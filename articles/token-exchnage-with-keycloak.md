@@ -1,5 +1,5 @@
 ---
-title: "がっつり体験！KeycloakでOAuth2 Token Exchangeをやってみた"
+title: "KeycloakでOAuth2 Token Exchangeをやってみた"
 emoji: "💬"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Keycloak","OAuth2","OAuth2TokenExchange"]
