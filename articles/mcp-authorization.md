@@ -3,7 +3,8 @@ title: "MCPのAuthorizationドキュメント読んで、実装して、Claude�
 emoji: "📌"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["MCP","OAuth","Auth0"]
-published: false
+published: true
+published_at: 2025-07-07 08:00
 ---
 ## はじめに
 昨今の生成AIの進歩は凄まじいものがあります。
@@ -245,6 +246,7 @@ await this.openBrowserAndConfirm(authUrl.toString());
 ```
 各種パラメータについては基本的に[OAuth2.1](https://oauth.net/2.1/)を参照していただければと思います。
 パラメータを付与して、URLが作成できたら別途ブラウザを開くようにして、そこで実際に認可サーバーへアクセスして認証を行います。※
+::: message
 ※ここで突然認証が出てきますが、実は今回の実装ではOAuthではなくOpenID Connectにてトークンを取得しています。
 そのため、ここでAuth0にアクセスするとログイン画面が出てきます。
 処理を続けるには認証が必要なので、先程認証を行うと記載しました。
@@ -252,6 +254,7 @@ await this.openBrowserAndConfirm(authUrl.toString());
 ですが、OpenID ConnectはOAuth2のAuthorization Codeをカバーしているので、今回は許容するようにしました。
 もし、この判断が誤りそうであればお手数おかけし申し訳ないのですが、是非ともコメントいただけますと幸いです。
 というか、私自身判断しかねている部分なので、コメントをバンバンいただきたいです。
+:::
 Auth0でのログインが完了すれば、simple-http-server.tsで設定した[画面](https://github.com/maronnjapan/sample-id-app/blob/mcp-authorization/src/client/simple-http-server.ts#L35C1-L186C4)にリダイレクトされ、そこで認可コードからアクセストークン取得・保存し、成功すれば画面が表示されます。
 上記アクセストークンを取得する流れは、今回のMCPドキュメントの範囲外でかつ完全にOAuth2のみでの話なので詳細は割愛します。
 ブラウザを開いてから、トークンを取得するまでの間は以下の処理が走っています。
