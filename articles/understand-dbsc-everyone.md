@@ -49,8 +49,8 @@ https://github.com/drubery/dbsc-test-server
 ## 仕様書は読まなくていいの？
 最短経路について書きましたが、その中に[DBSCの仕様書](https://w3c.github.io/webappsec-dbsc/)の言及がありませんでした。
 これは忘れているのではなく、意図的に書いていません。
-理由は、DBSCを使う側よりはDBSCのAPIを実装する側に向けた記載が多いためです。
-DBSCは大きく分けて、DBSCを利用するアプリのサーバー側と、DBSCを提供するブラウザ側があります。（やや不正確ですがご容赦ください）
+理由は、仕様はDBSCを使う側よりはDBSCのAPIを実装する側に向けた記載が多いためです。
+DBSCは大きく分けて、DBSCを利用するアプリのサーバー側と、DBSCを提供するブラウザ側があります。（やや不正確な記載ですがご容赦ください）
 仕様書はその中でも、DBSCを提供する際の記載が多く含まれています。
 DBSCは利用する側に負担を負わせないことが前提としてあります。（[参照](https://w3c.github.io/webappsec-dbsc/#:~:text=The%20API%20takes%20special%20care%20to%20integrate%20easily%20with%20existing%20server%2Dside%20auth%20stacks%2C%20providing%20an%20incremental%20path%20to%20such%20protections%20that%20does%20not%20require%20rewriting%20large%20parts%20of%20the%20web%20software%20stack.)）
 そのため、DBSCを提供する側で色々と考慮することが多く、その注意点などを仕様書に記載している形となります。
