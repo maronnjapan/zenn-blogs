@@ -1,5 +1,5 @@
 ---
-title: "改めてDBSCに入門する"
+title: "DBSCを理解する個人的最短経路"
 emoji: "😺"
 type: "tech"
 topics: ["DBSC", "Cookie"]
