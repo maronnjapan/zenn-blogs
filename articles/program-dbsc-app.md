@@ -44,8 +44,8 @@ DBSCは仕様を確認すると、以下の記載があります。
 設定としては、[こちらのイシュー](https://github.com/w3c/webappsec-dbsc/wiki/Testing-early-versions-of-DBSC)を参考にして行うと上手く行きました。
 では早速実装の中身を解説します。
 ## DBSCを実装したコードを見る
-:::message alert
-2025/07/25時点の仕様では、DBSCの各種ヘッダー名が`Sec-`から`Secure-`に変更されています。  
+:::message warning
+2025/07/25時点の仕様では、DBSCの各種ヘッダー名の接頭辞が`Secure-`に変更されています。  
 ですが、2025/07/25においてChromeでは、ヘッダー名が`Secure-`では動かず、`Sec-`でないと動きません。    
 将来的には、`Secure-`になっていくと思いますが、この記事では動くことを優先して`Sec-`を用いて実装しています。  
 :::
