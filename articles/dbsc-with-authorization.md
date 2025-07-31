@@ -19,6 +19,7 @@ https://workspace.google.com/blog/identity-and-security/defending-against-accoun
 実装へ入る前に、authorizationについて説明します。
 authorizationはDBSCにおいて、DBSCの開始の合図となる[Secure-Session-Registration](https://w3c.github.io/webappsec-dbsc/#secure-session-registration-header)ヘッダーに含まれる値となります。
 ![](/images/dbsc-with-authorization/2025-08-01_07h40_50.png)
+
 [Secure-Session-Registration](https://w3c.github.io/webappsec-dbsc/#secure-session-registration-header)ヘッダーに値が存在すると、[Secure-Session-Response](https://w3c.github.io/webappsec-dbsc/#secure-session-response-header)ヘッダーに存在するJWTのpayloadのauthorizationに設定した値が以下のように付与されます。
 ```json
 // Header
