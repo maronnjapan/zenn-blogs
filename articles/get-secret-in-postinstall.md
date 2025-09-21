@@ -22,7 +22,7 @@ https://codebook.machinarecord.com/threatreport/silobreaker-cyber-alert/40916/
 相当怖い話で攻撃手順は色々とありますが、この記事では[こちらの記事](https://codebook.machinarecord.com/threatreport/silobreaker-cyber-alert/40992/)で書かれていた以下の点について注目します。
 > 攻撃者は、npmパッケージの「package.json」ファイルに悪意ある「postinstall」スクリプトを埋め込んで侵害
 
-書いてあることはわかるのですが、当初の私はなぜこれが攻撃できるのかが理解できませんでした。
+書いてあることはわかるのですが、当初の私はなぜこれが攻撃につながるのかが理解できませんでした。
 なので、ここでは「postinstall」スクリプトへ悪意のあるコードが記載されたnpmパッケージを作成し、それをインストールした時の挙動について確認します。
 そして、上記対策になる方法を用いてインストールすると、なぜ対策となるのかについても確認します。
 気になる方がいれば一緒に確認いただけますと幸いです。
