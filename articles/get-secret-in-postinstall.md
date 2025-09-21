@@ -1,5 +1,5 @@
 ---
-title: "postinstallスクリプトを用いて、シークレット情報を抜き出す"
+title: "Shai-Huludの内容を読んで、postinstallスクリプトを用いたシークレット情報を抜き出すコードを作成した"
 emoji: "👿"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["npm","ShaiHulud","postinstall","Trufflehog"]
