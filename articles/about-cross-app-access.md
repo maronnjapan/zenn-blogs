@@ -5,6 +5,9 @@ type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Okta", "CrossAppAccess", "XAA", "MCP"]
 published: true
 ---
+この記事は[Digital Identity技術勉強会 #iddance Advent Calendar 2025](https://qiita.com/advent-calendar/2025/iddance)の15日目の記事です。
+https://qiita.com/advent-calendar/2025/iddance
+
 ## はじめに
 現在AIエージェントをはじめとした、Non-HumanのID管理というのが求められています。
 その中で、認可管理をエンタープライズで行うための仕様が今議論されています。
