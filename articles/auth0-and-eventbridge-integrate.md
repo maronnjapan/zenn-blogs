@@ -82,11 +82,12 @@ https://zenn.dev/maronn/articles/notify-block-user-by-auth0-event-stream
 
 まず、Auth0からのイベントを受信するのがEventBridge + EventBusです。
 EventBridgeは、受信したイベントを適切なターゲット（この場合はSQS）にルーティングします。
-ここでのポイントは、パートナーイベントソースを使用することで、Auth0との連携が安全に行える点です。
+Auth0との連携は、パートナーイベントソース経由となります。
 
 次に、EventBridgeから受け取ったイベントは、SQS（Simple Queue Service）でキューに保持され、非同期処理を実現します。
-このバッファリング機能により、Lambda側の処理速度に関係なく、イベントを取りこぼすことなく受け取ることができます。
-また、visibility timeoutの設定により、処理中のメッセージが他のコンシューマーに配信されないようにしています。
+この機能により、Lambda側の処理速度に関係なく、イベントを取りこぼすことなく受け取ることができます。
+また、visibility timeoutの設定により、処理中のメッセージが他のコンシューマーに配信されないようにしています。  
+なので、非同期は保ちつつも、重複処理のリスクを低減しています。
 
 万が一、SQSでの処理に失敗した場合は、イベントをDLQ（Dead Letter Queue）に退避します。
 これにより、連携先のアプリケーションが復旧した後に、DLQからメッセージを再度メインキューに戻すことで、失敗したイベントを再処理することが可能です。
@@ -98,43 +99,39 @@ Lambda関数は、デモアプリケーションのAPIエンドポイントにHT
 
 ## Event Streamとは
 
-ここまでで全体構成を説明してきましたが、そもそもAuth0のEvent Streamとは何なのでしょうか。
-この章では、Event Streamの概要と機能について説明します。
+ここまでで全体構成を説明してきましたが、そもそもAuth0のEvent Streamとは何なのかを軽く見ていきます。
+この章では、Event Streamの概要と機能について説明します。  
+ただし、詳細については触れませんので、興味がある方は公式ドキュメントを参照してください。
+https://auth0.com/docs/customize/events
 
 ### 概要
 
 Auth0のEvent Streamは、Auth0で発生した各種イベントをリアルタイムに外部システムへ配信する機能です。
-記事執筆時点では[Early Access](https://auth0.com/docs/customize/events/create-an-event-stream#:~:text=an%20Event%20Stream-,Events%20are%20currently%20available%20in,.,-To%20learn%20more)の機能となっていますので、今後仕様が変更される可能性があることを念頭に置いてください。
+記事執筆時点(2026/01/12)では[Early Access](https://auth0.com/docs/customize/events/create-an-event-stream#:~:text=an%20Event%20Stream-,Events%20are%20currently%20available%20in,.,-To%20learn%20more)の機能となっていますので、今後仕様が変更される可能性があることを念頭に置いてください。
 
 このEvent Streamを使用することで、ユーザーに関するイベント（ログイン、ユーザー情報の更新、ブロックなど）や組織（Organization）に関するイベントを検知し、外部システムに配信できるようになります。
 
 今回使用する`user.updated`イベントは、ユーザー情報が更新された際に発行されるイベントです。
 イベントペイロードには、user_id、blocked、emailなどの情報が含まれており、このblockedプロパティを確認することで、ユーザーがブロックされたかどうかを判定できます。
 
-ただし、ここで一つ注意点があります。
+ただし、一つ注意点があります。
 user.updatedイベントはブロック以外の更新でも発火するということです。
-例えば、メールアドレスの変更やメタデータの更新などでも同じイベントが配信されるため、本来であればblockedプロパティの変化を検知するフィルタリングロジックが必要になります。
+例えば、メールアドレスの変更やメタデータの更新などでも同じイベントが配信されるため、本来であればblockedプロパティの変化を検知するフィルタリングロジックが必要になります。  
+今回ではブロックした時のケースしか扱っていませんが、実際はイベント内の値をどう扱うかはあらかじめ検討が必要となります。
 
 ### 配信先の選択肢
 
 続いて、Auth0のEvent Streamがサポートしている配信先について見ていきます。
 Event Streamは、Webhook URLとAWS EventBridgeの2つの配信先をサポートしています。
+https://auth0.com/docs/customize/events/create-an-event-stream
 
 まず一つ目が、Webhook URLです。
-これは前回の記事で使用した方式で、指定したURLに対してHTTP POSTリクエストでイベントを送信する方式になります。
-実装がシンプルで、任意のエンドポイントに配信できるというメリットがある一方で、リトライ処理や障害対応を自前で実装する必要があります。
+これは[前回の記事](https://zenn.dev/maronn/articles/notify-block-user-by-auth0-event-stream)で使用した方式で、指定したURLに対してHTTP POSTリクエストでイベントを送信する方式になります。
+実装がシンプルで、任意のエンドポイントに配信できるというメリットがある一方で、シークレットの管理や、リトライ処理や障害対応を自前で実装する必要があります。
 
 そして二つ目が、今回使用するAWS EventBridgeです。
 この方式では、AWSのパートナーイベントソースを経由して、EventBridgeにイベントを配信します。
 AWSのマネージドサービスと連携できるため、リトライ機構やDLQなどの機能を活用でき、より堅牢な構成を実現できるのが特徴です。
-
-### 参考ドキュメント
-
-Auth0のEvent Streamについてさらに詳しく知りたい方は、以下の公式ドキュメントを参照してください。
-https://auth0.com/docs/customize/events
-
-また、Event StreamとAWS EventBridgeの連携については、以下のドキュメントが参考になります。
-https://auth0.com/docs/ja-jp/customize/events/create-an-event-stream#aws-eventbridge
 
 ## 今回の構成の利点
 
@@ -146,7 +143,6 @@ https://auth0.com/docs/ja-jp/customize/events/create-an-event-stream#aws-eventbr
 まず一つ目の利点は、非同期処理によるブロッキングの回避です。
 今回の構成では、Auth0からEventBridge、SQS、Lambdaと非同期に処理が進むため、イベント発生元であるAuth0の処理をブロックしません。
 
-ここで問題になるのが、前回のWebhook版の場合です。
 Webhook版でも受け取った後に非同期処理を行うことは可能ですが、別途キューの仕組みを用意する必要があります。
 特に、サーバーレス環境（例：Cloudflare Workers）でWebhookを受ける場合、EventEmitterなどを使ったイベント駆動の実装では、イベントが消失するリスクがあります。
 
@@ -223,25 +219,6 @@ SQSとLambdaの構成では、同じイベントが複数回処理される可�
 
 今回のデモでは、シンプルさを優先して冪等性は担保していませんが、本番運用では必須の対策となります。
 
-### SQS/Lambdaの設定値
-
-三つ目の注意点は、設定値についてです。
-今回の構成では、以下の設定値を使用しています。
-
-- visibility_timeout_seconds: 90秒
-  メッセージが処理中に他のコンシューマーに配信されないようにする時間です。
-  Lambda関数のタイムアウト（30秒）よりも長く設定することで、処理中のメッセージが重複して配信されることを防ぎます。
-
-- maxReceiveCount: 3回
-  メッセージが取得された回数がこの値を超えると、DLQに移動します。
-  今回は3回失敗した場合にDLQに移動するように設定しています。
-
-- Lambda側のリトライ: 3回
-  Lambda関数でエラーが発生した場合、SQSが自動的にリトライします。
-
-ただし、正直に言うと、これらの値については深い検討を行ったわけではありません。
-あくまで参考値として記載していますので、本番運用では、アプリケーションの特性に応じて適切な値を設定してください。
-
 ### コストへの意識
 
 最後の注意点は、コストについてです。
@@ -251,13 +228,11 @@ SQSとLambdaの構成では、同じイベントが複数回処理される可�
 EventBridgeはイベント数に応じて課金されるため、むやみに多くのイベントを流すとコストが増加します。
 前述の通り、user.updatedイベントはブロック以外の更新でも発火するため、フィルタリングを行わないと不要なイベントも配信されてしまいます。
 
-そのため、本番導入時は、以下の点を考慮してコストを見積もることを推奨します。
+そのため、本番導入時は、以下の点を考慮しつつ、キャッチしたいイベントをフィルタリングの検討が必要となります。
 
 - 月間のイベント発生数
 - SQSのメッセージ数とリトライ回数
 - Lambda関数の実行回数と実行時間
-
-AWSの料金計算ツールを使用することで、おおよそのコストを事前に把握できます。
 
 ## 設定手順
 
@@ -287,9 +262,10 @@ IAM Identity CenterでAdmin権限を持つSSOアカウントがあることを�
 詳細な設定手順については、サンプルリポジトリにまとめています。
 今回の構成を実際に試すためのサンプルコードは、以下のGitHubリポジトリで公開しています。
 
-（サンプルリポジトリのリンク：準備中）
-
-READMEには、詳細なセットアップ手順を記載していますので、そちらを参照してください。
+https://github.com/maronnjapan/sample-id-app/tree/linked-aws-and-auth0-by-event-stream
+このサンプルリポジトリでは、AWSやAuth0のCLI、Terraformを使って環境構築を自動化しています。
+この記事を見て、試してみたい方がいらっしゃいましたら活用いただければ幸いです。
+手順については、詳細をREADMEに記載していますので、そちらを参照してください。
 このブログでは、設定の流れの概要のみを説明します。
 
 ### 設定の流れ（概要のみ）
@@ -303,11 +279,9 @@ AWS CLIでSSOログインを行い、Terraform用のクレデンシャルを取�
 また、Auth0側でもTerraformを使うため、Management APIにアクセスできるMachine to Machine Applicationを作成します。
 
 2つ目の手順として、Auth0側でEvent StreamをTerraform経由で生成します。
-次に、Auth0のEvent Streamを、Terraformを使って作成します。
-この際、AWSアカウントIDとリージョンを指定することで、AWSのパートナーイベントソースと連携します。
+Terraformの実行に必要なシークレットは一つ目の手順で自動的に設定されるため、Terraformを実行するだけでEvent Streamが作成されます。
 
 3つ目の手順として、AWS側でパートナーイベントソースの紐づけをCLIで行います。
-続いて、Auth0がAWS側に作成したパートナーイベントソースを、EventBusに関連付けます。
 この手順は、後述するハマりポイントでも触れますが、TerraformではできないためCLIスクリプトで実行します。
 
 4つ目の手順として、Terraform経由でAWSの残りの構成（EventBus、SQS、DLQ、Lambda）を設定します。
@@ -329,9 +303,9 @@ AWS CLIでSSOログインを行い、Terraform用のクレデンシャルを取�
 今回の構成を構築する際に、最も理解に時間がかかったのが、Auth0とAWSの連携方法でした。
 
 具体的に何が分からなかったかというと、Auth0のEvent Stream作成画面では、AWSアカウントIDとリージョンを入力するだけで、特にAPIキーやシークレットを設定する項目がないことです。
-最初は「これだけでAWSとどう連携するのか？」と疑問に思いました。
+最初は「これだけでAWSとどう連携するのか？」が分からず、時間を結構消費してしまいました。
 
-![Auth0のEvent Stream設定画面（準備中）](/images/auth0-and-eventbridge-integrate/auth0-eventbridge-setting.png)
+![Auth0のEvent Stream設定画面](/images/auth0-and-eventbridge-integrate/create-event-stream-view.png)
 
 その答えは、AWSのパートナーイベントソースにありました。
 
@@ -343,6 +317,8 @@ AWS CLIでSSOログインを行い、Terraform用のクレデンシャルを取�
 
 この仕組みを理解するのに、以下の記事がとても参考になりました。
 https://dev.classmethod.jp/articles/auth0-log-streams-to-amazon-eventbridge-with-cloudformation/
+ただ、記事の内容はLog Streamを使った方法となっているため、実際の連携方法は異なります。   
+今回セットアップがCLI経由のため、UIベースの手順だとこんな感じの雰囲気になるのかという参考程度にご覧ください。
 
 ### パートナーイベントソースとTerraformの連携
 
@@ -356,23 +332,30 @@ https://dev.classmethod.jp/articles/auth0-log-streams-to-amazon-eventbridge-with
 1. AWSコンソールのUI上で手動で関連付ける
 2. AWS CLIを使ってスクリプトで実行する
 
-今回のサンプルリポジトリでは、以下のようなCLIスクリプトで対応しています。
+今回のサンプルリポジトリでは、[update-eventbus.sh](https://github.com/maronnjapan/sample-id-app/blob/linked-aws-and-auth0-by-event-stream/aws/update-eventbus.sh)スクリプトを作成し、内部でCLIを用いて対応しています。
+詳細は上記ファイルを見ていただきたいですが、紐づけの部分は以下のような形です。
 
 ```bash
 #!/bin/bash
 # パートナーイベントソースを取得
 EVENT_SOURCE_NAME=$(aws events list-event-sources \
-  --name-prefix "aws.partner/auth0.com" \
-  --query 'EventSources[0].Name' \
+  --profile "${AWS_PROFILE}" \
+  --region "${AWS_REGION}" \
+  --name-prefix "aws.partner/auth0.com/" \
+  --query "EventSources[?State=='PENDING'] | sort_by(@, &CreationTime) | [-1].Name" \
   --output text)
 
 # EventBusに関連付ける
-aws events activate-event-source \
-  --name "$EVENT_SOURCE_NAME"
+aws events create-event-bus \
+  --profile "${AWS_PROFILE}" \
+  --region "${AWS_REGION}" \
+  --name "${EVENT_SOURCE_NAME}" \
+  --event-source-name "${EVENT_SOURCE_NAME}" 
 ```
 
 一方で、関連付けた後のEventBusは、Terraformの`aws_cloudwatch_event_bus`データソースで参照できます。
 これにより、EventBusに対するルールやターゲット（SQSなど）の設定をTerraformで管理できるようになります。
+例としては以下のような形です。
 
 ```hcl
 # パートナーイベントソースから作成されたEventBusを参照
@@ -390,17 +373,12 @@ resource "aws_cloudwatch_event_rule" "auth0_events" {
   })
 }
 ```
+dataソースに名前を設定するのは、[update-eventbus.sh](https://github.com/maronnjapan/sample-id-app/blob/linked-aws-and-auth0-by-event-stream/aws/update-eventbus.sh)で行っています。
+なので、別途tfファイルに設定する必要はありませんが、手順としては存在することを覚えておいてください。
 
-ただし、一つ注意点があります。
+設定についてはサンプルリポジトリである程度自動化していますが、一つ注意点があります。
 データソースで参照しているため、`terraform destroy`を実行してもパートナーイベントソースの登録は解除されません。
 完全にクリーンアップするには、AWS CLIまたはコンソールで手動で削除する必要があることを覚えておいてください。
-
-### 詳細な解消方法
-
-これらのハマりポイントの詳細な解消方法は、サンプルリポジトリのREADMEとスクリプトに記載しています。
-特に、パートナーイベントソースの関連付けスクリプトについては、`scripts/activate-partner-event-source.sh`を参照してください。
-
-（サンプルリポジトリへのリンク：準備中）
 
 ## WebhookとEventBridge、どちらを選ぶか
 
@@ -413,7 +391,7 @@ resource "aws_cloudwatch_event_rule" "auth0_events" {
 まず結論から言うと、コストが許すならEventBridge（AWS連携）を推奨します。
 
 ただし、これはあくまで一般論であって、環境や要件によっては、Webhookの方が適している場合もあります。
-そこで、それぞれのメリット・デメリットを整理して、適切な選択ができるように解説していきます。
+そこで、それぞれのメリット・デメリットを整理していこうと思います。
 
 ### EventBridgeを推奨する理由
 
@@ -484,11 +462,10 @@ AWSの知識がないチームや、プロトタイプを素早く作りたい�
 
 まず、冪等性の担保についてです。
 event_idをキーにして、既に処理済みかどうかをチェックする仕組みを実装することで、重複処理を防げます。
-DynamoDBやRedisなどを使って、処理済みイベントのIDを記録しておくと良いでしょう。
+DynamoDBやRedisなどを使って、処理済みイベントのIDを記録しておくなどの方法が考えられます。
 
 次に、他のイベント種別への拡張です。
-今回はuser.updatedイベントのみを扱いましたが、Auth0のEvent Streamは様々なイベントをサポートしています。
-例えば、ログインイベント（login.success）や組織の変更イベントなども配信できます。
+今回はuser.updatedイベントのみを扱いましたが、Auth0のEvent StreamはユーザーやOrganizationに関わる様々なイベントをサポートしています。
 EventBridgeのフィルタリング機能を使って、イベント種別ごとに異なるターゲットに配信することも可能です。
 
 さらに、モニタリング・アラートの追加も検討する価値があります。
@@ -498,13 +475,11 @@ CloudWatch Metricsを使って、SQSのメッセージ数やDLQのメッセー�
 また、イベントの順序が重要な場合は、標準キューではなくFIFOキューを使用することも検討できます。
 ただし、DLQとの組み合わせでは順序保証が難しい点に注意が必要です。
 
+以上となります、この記事を読んで気になった方は是非とも試していただければ幸いです。
+そして、何か改善点や質問があれば、コメントで教えていただけると嬉しいです。
+ここまで読んでいただき、ありがとうございました。
+
 ### 参考リンク
-
-今回の記事で使用したリソースや参考情報をまとめます。
-
-サンプルリポジトリ：
-（準備中）
-
 Auth0 Event Stream公式ドキュメント：
 https://auth0.com/docs/customize/events
 
@@ -516,11 +491,3 @@ https://zenn.dev/maronn/articles/notify-block-user-by-auth0-event-stream
 
 参考にした記事：
 https://dev.classmethod.jp/articles/auth0-log-streams-to-amazon-eventbridge-with-cloudformation/
-
-今回の構成は、Auth0のEvent Streamを活用した実践的な例の一つです。
-AWSのマネージドサービスを活用することで、堅牢で運用しやすいシステムを構築できました。
-
-ぜひ、皆さんのプロジェクトでも試してみてください。
-そして、何か改善点や質問があれば、コメントで教えていただけると嬉しいです。
-
-ここまで読んでいただき、ありがとうございました。
