@@ -5,7 +5,6 @@ type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["Auth0", "AWS", "EventBridge", "SQS", "Lambda"]
 published: true
 ---
-# Auth0のEvent StreamとAWSのEventBridgeを連携して、リトライ可能かつ非同期に情報を連携する
 
 ## はじめに
 
