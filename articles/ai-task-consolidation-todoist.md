@@ -308,22 +308,644 @@ GeminiはGoogle Tasksとのやり取りを前提にします。
 
 ### Gemini連携の全体フロー
 
-まずGeminiでタスクを扱います。
-会話の中で出てきたやることを、Gemini経由でGoogle Tasksに入れます。
-その後、Google Apps Scriptで定期実行するスクリプトが、Google Tasksの内容をチェックします。
+全体の構成は以下のようになっています。
+
+```
+Gemini
+  ↓ タスク登録
+Google Tasks
+  ↑↓ GAS（5分ごとにポーリング）
+Todoist（マスター）
+```
+
+GeminiはGoogle Workspaceと深く統合されているため、タスク管理にGoogle Tasksを使うのが自然な流れになります。
+Geminiとの会話中に「これをタスクに追加して」と伝えると、Google Tasksにタスクが作成されます。
+その後、Google Apps Script（GAS）で定期実行するスクリプトが、Google Tasksの内容をチェックします。
 新しいタスクがあれば、Todoist APIを叩いて転送・同期します。
+
+前提として、Todoistが正（マスター）です。
+Google Tasksはあくまで入力窓口・ミラーとして扱っています。
+
+### 設計上の主な判断
+
+ここで、同期の仕組みを作るにあたって考えたことをいくつか書いておきます。
+
+#### なぜポーリングか
+
+Google Tasksにはタスクの作成・編集・削除をトリガーにする仕組みがありません。
+WebhookのようなAPIが用意されていないのです。
+そのため、GASの時間ベーストリガーで5分ごとに同期を走らせるアプローチをとっています。
+リアルタイム性は若干犠牲になりますが、Geminiからのタスク登録用途では十分許容できると判断しました。
+
+#### 「新規タスク」と「既存タスク」をどう区別するか
+
+Google Tasks側のタスクに`[todoist:タスクID]`というタグをnotesフィールドの末尾に書き込むようにしています。
+このタグの有無で新規か既存かを判定します。
+
+- タグなし → 新規タスク（TodoistへPOSTし、IDを書き戻す）
+- タグあり → 既存タスク（Todoistの状態を確認して同期）
+
+具体的には、以下のようなイメージです。
+
+```
+タスク名: MTGの議事録をまとめる
+---
+notesフィールド:
+詳細メモ...
+[todoist:8765432109]  ← GASが自動で追記
+```
+
+notesに乗っかってしまう点は若干気持ち悪いですが、Google Tasks APIにはカスタムメタデータ用のフィールドがないため、現実的な妥協点として採用しています。
+
+#### Google Tasksで手動削除されたタスクをどう検出するか
+
+`PropertiesService`（GASのスクリプトプロパティ）に、前回同期時点でのtodoist_idの一覧を保存しておきます。
+次回の同期時に「前回あったIDが今回のGoogle Tasksに存在しない」場合を手動削除と判定して、Todoist側も削除します。
+
+```javascript
+const prevIdsJson = props.getProperty(PREV_IDS_KEY);
+const prevTodoistIds = prevIdsJson ? JSON.parse(prevIdsJson) : {};
+
+// 同期処理後...
+for (const [prevTodoistId, info] of Object.entries(prevTodoistIds)) {
+  if (!currentTodoistIds[prevTodoistId]) {
+    // Google Tasksから消えた → Todoistからも削除
+    deleteTodoistTask(todoistToken, prevTodoistId);
+  }
+}
+```
+
+#### プロジェクト/リストの対応
+
+Google Tasksの「リスト名」とTodoistの「プロジェクト名」が完全一致する場合にペアとして同期します。
+一致しないものは、Google Tasksはデフォルトリスト、TodoistはInboxへ振り分けます。
+また、Todoistに存在してGoogle Tasksにないプロジェクトがあれば、自動でGoogle Tasksにリストを作成するようにしています。
+
+### 同期フローの詳細
+
+実際の同期は3つのステップで動きます。
+
+#### Todoist → Google Tasks（新規タスクの反映）
+
+Todoistの全タスクを取得し、前回同期時のIDセットと比較します。
+前回なかったIDが新規タスクとして検出され、対応するGoogle Tasksリストに作成されます。
+
+この際、最初から`[todoist:xxx]`タグをnotesに付与することで、次のステップで二重登録されることを防いでいます。
+
+また、TodoistのタスクはGoogle Tasks側では期日なしで作成しています。
+Google TasksのAPIは期日超過のタスクを拒否する場合があり、Google Tasks側に期日管理を求めていないためです。
+
+```javascript
+function createGoogleTask(taskListId, todoistTask) {
+  const idTag = `[todoist:${todoistTask.id}]`;
+  const notes = todoistTask.description
+    ? `${todoistTask.description}\n${idTag}`
+    : idTag;
+  const taskBody = {
+    title: todoistTask.content,
+    notes: notes,
+    // 期日はGoogle Tasks側では管理しない
+  };
+  return Tasks.Tasks.insert(taskBody, taskListId).id;
+}
+```
+
+#### Google Tasks → Todoist
+
+Google Tasksの全リストを横断し、各タスクを処理します。
+
+- `[todoist:xxx]`なし → Todoistに新規作成 → IDをGoogle Tasksのnotesに書き戻す
+- `[todoist:xxx]`あり → Todoistのタスク状態を確認
+  - 完了済み or 存在しない → Google Tasksから削除
+  - 未完了 → 何もしない
+
+#### 手動削除の検出
+
+前回IDマップと今回の差分から、Google Tasksで手動削除されたタスクを検出してTodoistからも削除します。
+
+なお、Google Tasksで手動完了されたタスクはTodoistに反映しません。
+Todoistをマスターとしているため、完了はTodoist側で行う運用としています。
+
+### APIトークンの管理について
+
+Todoistのトークンはコードに直書きせず、GASの`PropertiesService`に格納しています。
+
+```javascript
+const props = PropertiesService.getScriptProperties();
+const todoistToken = props.getProperty('TODOIST_API_TOKEN');
+```
+
+スクリプトプロパティはGASエディタの「プロジェクトの設定」から設定できます。
+コードをGitHubなどで管理する場合もトークンが漏れません。
+
+また、タスク作成時には`X-Request-Id`ヘッダーにUUIDを付与しています。
+GASのトリガーが重複実行された場合の二重作成を防ぐ冪等性対策です。
+
+```javascript
+headers: {
+  'Authorization': `Bearer ${token}`,
+  'Content-Type': 'application/json',
+  'X-Request-Id': Utilities.getUuid()
+}
+```
 
 ### Gemini連携の設定手順
 
-Gemini側では、タスクをGoogle Tasksに追加する形で扱います。
-Geminiとの会話中に「これをタスクに追加して」と伝えると、Google Tasksにタスクが作成されます。
+セットアップの手順は以下のとおりです。
 
-Google Tasks側は特別な設定は不要ですが、Apps Scriptからアクセスするための前提として、Googleアカウントで利用可能な状態にしておきます。
+まず、GASエディタの左メニュー「サービス」から`Tasks API`を追加します。
+これでGoogle Tasks APIがGASから使えるようになります。
 
-Apps Scriptでは、Google Tasks APIを使ってタスクの一覧を取得し、未転送のものをTodoist APIに送信する処理を実装します。
-Todoist APIとの接続には、TodoistのAPIトークンを使い、`UrlFetchApp`でリクエストを送ります。
+次に、「プロジェクトの設定」→「スクリプトプロパティ」に以下を追加します。
 
-定期実行はApps Scriptのトリガー機能を使い、一定間隔でスクリプトが走るように設定します。
+| キー | 値 |
+|------|----|
+| `TODOIST_API_TOKEN` | Todoist設定 > 連携 > APIトークン |
+
+設定が終わったら、`checkSetup()`関数を手動で一度実行してください。
+Google Tasksのリスト一覧、Todoistのプロジェクト一覧、名前一致マッピング結果がログに出力されます。
+期待通りのペアになっているか確認します。
+
+最後に、`syncTasks()`関数に時間ベーストリガーを設定します。
+5分ごとの実行を推奨しています。
+
+### 同期スクリプトの全体コード
+
+以下が実際に使っているGoogle Apps Scriptの全体コードです。
+
+:::details Google Apps Script 全体コード
+
+```javascript
+// ============================================================
+// 【セットアップ】
+// 1. GASエディタ「サービス」→ Tasks API を追加
+// 2. 「プロジェクトの設定」→「スクリプトプロパティ」に以下を追加
+//    - TODOIST_API_TOKEN : TodoistのAPIトークン（Todoist設定 > 連携 > APIトークン）
+// 3. syncTasks関数に時間ベースのトリガーを設定（例：5分ごと）
+//
+// 【リスト/プロジェクト対応ルール】
+// - Google Tasksのリスト名 と Todoistのプロジェクト名 が完全一致する場合、そのペアで同期
+// - 一致しない場合：Google Tasksはデフォルトリスト、TodoistはInbox
+//
+// 【双方向同期の仕様】
+// Google Tasks → Todoist:
+//   - notesに[todoist:xxx]がないタスクを新規としてTodoistに作成
+//   - Google Tasksで手動削除されたタスクはTodoistからも削除
+//
+// Todoist → Google Tasks:
+//   - PREV_TODOIST_TASK_IDS に存在しない新規タスクをGoogle Tasksに作成
+//   - Todoistで完了/削除されたタスクはGoogle Tasksからも削除
+//   - Todoistでプロジェクトが新規作成された場合、Google Tasksにも同名リストを作成
+//
+// 【二重登録防止】
+// Todoistから同期したタスクはGoogle Tasks側のnotesに[todoist:xxx]タグを付与するため、
+// 次回のGASサイクルで再びTodoistに登録されることはない
+// ============================================================
+
+const TODOIST_ID_PREFIX = '[todoist:';
+const TODOIST_ID_SUFFIX = ']';
+const PREV_IDS_KEY = 'PREV_TODOIST_IDS';               // { todoistId: { googleTaskId, googleListId } }
+const PREV_TODOIST_TASK_IDS_KEY = 'PREV_TODOIST_TASK_IDS'; // Todoist側の全タスクID Set（JSON配列）
+
+// ============================================================
+// メイン関数（トリガーにこれを設定）
+// ============================================================
+function syncTasks() {
+  const props = PropertiesService.getScriptProperties();
+  const todoistToken = props.getProperty('TODOIST_API_TOKEN');
+  if (!todoistToken) {
+    Logger.log('ERROR: TODOIST_API_TOKEN が設定されていません');
+    return;
+  }
+
+  // --- プロジェクト/リストのマッピングを構築 ---
+  let googleTaskLists = getGoogleTaskLists();
+  const todoistProjects = getTodoistProjects(todoistToken); // { name: projectId }
+
+  // Todoistに存在してGoogle Tasksにないプロジェクトがあれば、Google Tasksにリストを作成
+  googleTaskLists = syncProjectsToGoogleTaskLists(googleTaskLists, todoistProjects);
+
+  // 名前が完全一致するペアを作成
+  // { googleTaskListId: { todoistProjectId, listName } }
+  const listMapping = buildListMapping(googleTaskLists, todoistProjects);
+
+  Logger.log('リスト対応マップ:');
+  for (const [gtListId, info] of Object.entries(listMapping)) {
+    Logger.log(`  "${info.listName}" → Todoist Project: ${info.todoistProjectId || 'Inbox'}`);
+  }
+
+  // --- 前回同期時のIDマップを取得 ---
+  const prevIdsJson = props.getProperty(PREV_IDS_KEY);
+  const prevTodoistIds = prevIdsJson ? JSON.parse(prevIdsJson) : {};
+
+  const prevTodoistTaskIdsJson = props.getProperty(PREV_TODOIST_TASK_IDS_KEY);
+  const prevTodoistTaskIds = new Set(prevTodoistTaskIdsJson ? JSON.parse(prevTodoistTaskIdsJson) : []);
+
+  // --- 今回のIDマップ ---
+  const currentTodoistIds = {};         // Google Tasks起点で管理: { todoistId: { googleTaskId, googleListId } }
+  const currentTodoistTaskIds = new Set(); // Todoist全タスクID
+
+  // ============================================================
+  // STEP 1: Todoist → Google Tasks 同期
+  //   Todoistの全タスクを取得し、新規タスクをGoogle Tasksに反映
+  // ============================================================
+  const allTodoistTasks = getAllTodoistTasks(todoistToken);
+
+  // プロジェクトIDからGoogleリストIDへの逆引きマップ
+  // { todoistProjectId: googleTaskListId }
+  const projectToListMap = buildProjectToListMap(listMapping);
+
+  for (const todoistTask of allTodoistTasks) {
+    currentTodoistTaskIds.add(todoistTask.id);
+
+    if (!prevTodoistTaskIds.has(todoistTask.id)) {
+      // 前回存在しなかった = Todoistで新規作成されたタスク
+      // Google Tasksの対応リストに作成
+      const targetGtListId = projectToListMap[todoistTask.project_id] || getDefaultGoogleTaskListId(googleTaskLists);
+      const newGtTaskId = createGoogleTask(targetGtListId, todoistTask);
+      if (newGtTaskId) {
+        currentTodoistIds[todoistTask.id] = { googleTaskId: newGtTaskId, googleListId: targetGtListId };
+        Logger.log(`Google Tasks新規作成（Todoistから）: "${todoistTask.content}" → GT ID: ${newGtTaskId}`);
+      }
+    }
+  }
+
+  // ============================================================
+  // STEP 2: Google Tasks → Todoist 同期
+  //   Google Tasksの全タスクを取得し、新規/既存を処理
+  // ============================================================
+  for (const [gtListId, info] of Object.entries(listMapping)) {
+    const googleTasks = getGoogleTasks(gtListId);
+
+    for (const task of googleTasks) {
+      const existingTodoistId = extractTodoistId(task.notes);
+
+      if (!existingTodoistId) {
+        // 新規タスク（todoist_idなし）→ Todoistに作成
+        const newTodoistId = createTodoistTask(todoistToken, task, info.todoistProjectId);
+        if (newTodoistId) {
+          appendTodoistIdToTask(gtListId, task.id, task.notes, newTodoistId);
+          currentTodoistIds[newTodoistId] = { googleTaskId: task.id, googleListId: gtListId };
+          currentTodoistTaskIds.add(newTodoistId);
+          Logger.log(`Todoist新規作成（Google Tasksから）: "${task.title}" → Todoist ID: ${newTodoistId}`);
+        }
+      } else {
+        // 既存タスク（todoist_idあり）→ Todoist側の状態を確認
+        const todoistTask = getTodoistTask(todoistToken, existingTodoistId);
+        currentTodoistIds[existingTodoistId] = { googleTaskId: task.id, googleListId: gtListId };
+
+        if (!todoistTask || todoistTask.is_deleted || !!todoistTask.completed_at) {
+          // Todoist側で完了 or 削除 → Google Tasksから削除
+          deleteGoogleTask(gtListId, task.id);
+          delete currentTodoistIds[existingTodoistId];
+          currentTodoistTaskIds.delete(existingTodoistId);
+          Logger.log(`Google Tasks削除（Todoist完了済み）: "${task.title}"`);
+        }
+        // Todoist未完了の場合は何もしない
+      }
+    }
+  }
+
+  // ============================================================
+  // STEP 3: Google Tasksで手動削除されたタスクをTodoistからも削除
+  // ============================================================
+  for (const [prevTodoistId, info] of Object.entries(prevTodoistIds)) {
+    if (!currentTodoistIds[prevTodoistId]) {
+      deleteTodoistTask(todoistToken, prevTodoistId);
+      currentTodoistTaskIds.delete(prevTodoistId);
+      Logger.log(`Todoist削除（Google Tasks手動削除）: Todoist ID: ${prevTodoistId}`);
+    }
+  }
+
+  // --- 今回のIDマップを保存 ---
+  props.setProperty(PREV_IDS_KEY, JSON.stringify(currentTodoistIds));
+  props.setProperty(PREV_TODOIST_TASK_IDS_KEY, JSON.stringify([...currentTodoistTaskIds]));
+}
+
+// ============================================================
+// プロジェクト/リスト同期
+// ============================================================
+
+// Todoistプロジェクトに存在してGoogle Tasksにないリストを作成
+function syncProjectsToGoogleTaskLists(googleTaskLists, todoistProjects) {
+  const existingListNames = new Set(googleTaskLists.map(l => l.title));
+  for (const projectName of Object.keys(todoistProjects)) {
+    if (!existingListNames.has(projectName)) {
+      const newList = createGoogleTaskList(projectName);
+      if (newList) {
+        googleTaskLists.push(newList);
+        Logger.log(`Google Tasksリスト作成（Todoistプロジェクトから）: "${projectName}"`);
+      }
+    }
+  }
+  return googleTaskLists;
+}
+
+function buildListMapping(googleTaskLists, todoistProjects) {
+  const mapping = {};
+  for (const gtList of googleTaskLists) {
+    const matchedProjectId = todoistProjects[gtList.title] || null;
+    mapping[gtList.id] = {
+      listName: gtList.title,
+      todoistProjectId: matchedProjectId
+    };
+  }
+  return mapping;
+}
+
+// { todoistProjectId: googleTaskListId } の逆引きマップ
+function buildProjectToListMap(listMapping) {
+  const map = {};
+  for (const [gtListId, info] of Object.entries(listMapping)) {
+    if (info.todoistProjectId) {
+      map[info.todoistProjectId] = gtListId;
+    }
+  }
+  return map;
+}
+
+function getDefaultGoogleTaskListId(googleTaskLists) {
+  // 先頭リストをデフォルトとして使用
+  return googleTaskLists.length > 0 ? googleTaskLists[0].id : '@default';
+}
+
+// ============================================================
+// Google Tasks API
+// ============================================================
+
+function getGoogleTaskLists() {
+  try {
+    const response = Tasks.Tasklists.list({ maxResults: 100 });
+    return response.items || [];
+  } catch (e) {
+    Logger.log(`Google Tasksリスト取得エラー: ${e}`);
+    return [];
+  }
+}
+
+function createGoogleTaskList(name) {
+  try {
+    return Tasks.Tasklists.insert({ title: name });
+  } catch (e) {
+    Logger.log(`Google Tasksリスト作成エラー: ${e}`);
+    return null;
+  }
+}
+
+function getGoogleTasks(taskListId) {
+  try {
+    const response = Tasks.Tasks.list(taskListId, {
+      showCompleted: false,
+      showHidden: false,
+      maxResults: 100
+    });
+    return response.items || [];
+  } catch (e) {
+    Logger.log(`Google Tasks取得エラー: ${e}`);
+    return [];
+  }
+}
+
+// TodoistタスクをGoogle Tasksに作成（[todoist:xxx]タグをnotesに付与して二重登録防止）
+function createGoogleTask(taskListId, todoistTask) {
+  const idTag = `${TODOIST_ID_PREFIX}${todoistTask.id}${TODOIST_ID_SUFFIX}`;
+  const notes = todoistTask.description
+    ? `${todoistTask.description}\n${idTag}`
+    : idTag;
+
+  const taskBody = {
+    title: todoistTask.content,
+    notes: notes,
+  };
+
+  try {
+    const result = Tasks.Tasks.insert(taskBody, taskListId);
+    return result.id;
+  } catch (e) {
+    Logger.log(`Google Tasksタスク作成エラー: ${e}`);
+    return null;
+  }
+}
+
+function deleteGoogleTask(taskListId, taskId) {
+  try {
+    Tasks.Tasks.remove(taskListId, taskId);
+  } catch (e) {
+    Logger.log(`Google Tasks削除エラー: ${e}`);
+  }
+}
+
+function appendTodoistIdToTask(taskListId, taskId, currentNotes, todoistId) {
+  const idTag = `${TODOIST_ID_PREFIX}${todoistId}${TODOIST_ID_SUFFIX}`;
+  const newNotes = currentNotes ? `${currentNotes}\n${idTag}` : idTag;
+  try {
+    Tasks.Tasks.patch({ notes: newNotes }, taskListId, taskId);
+  } catch (e) {
+    Logger.log(`Google Tasks更新エラー: ${e}`);
+  }
+}
+
+// ============================================================
+// Todoist API
+// ============================================================
+
+function getTodoistProjects(token) {
+  try {
+    const response = UrlFetchApp.fetch('https://api.todoist.com/api/v1/projects', {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+      muteHttpExceptions: true
+    });
+    if (response.getResponseCode() === 200) {
+      const result = JSON.parse(response.getContentText());
+      const projects = result.results;
+      const map = {};
+      for (const project of projects) {
+        map[project.name] = project.id;
+      }
+      return map;
+    } else {
+      Logger.log(`Todoistプロジェクト取得エラー: ${response.getResponseCode()}`);
+      Logger.log(`Todoistプロジェクト取得エラー: ${response.getContentText()}`);
+      return {};
+    }
+  } catch (e) {
+    Logger.log(`Todoistプロジェクト取得例外: ${e}`);
+    return {};
+  }
+}
+
+// Todoistの全タスクを取得
+function getAllTodoistTasks(token) {
+  try {
+    const response = UrlFetchApp.fetch('https://api.todoist.com/api/v1/tasks', {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+      muteHttpExceptions: true
+    });
+    if (response.getResponseCode() === 200) {
+      const result = JSON.parse(response.getContentText());
+      return result.results || [];
+    } else {
+      Logger.log(`Todoist全タスク取得エラー: ${response.getResponseCode()} ${response.getContentText()}`);
+      return [];
+    }
+  } catch (e) {
+    Logger.log(`Todoist全タスク取得例外: ${e}`);
+    return [];
+  }
+}
+
+function createTodoistTask(token, googleTask, projectId) {
+  const payload = {
+    content: googleTask.title,
+  };
+  if (googleTask.notes) {
+    const cleanNotes = removeTodoistIdTag(googleTask.notes);
+    if (cleanNotes.trim()) {
+      payload.description = cleanNotes.trim();
+    }
+  }
+  if (googleTask.due) {
+    payload.due_date = googleTask.due.date;
+  }
+  if (projectId) {
+    payload.project_id = projectId;
+  }
+
+  try {
+    const response = UrlFetchApp.fetch('https://api.todoist.com/api/v1/tasks', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-Request-Id': Utilities.getUuid()
+      },
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+    if (response.getResponseCode() === 200) {
+      const task = JSON.parse(response.getContentText());
+      return task.id;
+    } else {
+      Logger.log(`Todoist作成エラー: ${response.getResponseCode()} ${response.getContentText()}`);
+      return null;
+    }
+  } catch (e) {
+    Logger.log(`Todoist作成例外: ${e}`);
+    return null;
+  }
+}
+
+function getTodoistTask(token, todoistId) {
+  try {
+    const response = UrlFetchApp.fetch(`https://api.todoist.com/api/v1/tasks/${todoistId}`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+      muteHttpExceptions: true
+    });
+    if (response.getResponseCode() === 200) {
+      return JSON.parse(response.getContentText());
+    } else if (response.getResponseCode() === 404) {
+      return null;
+    } else {
+      Logger.log(`Todoist取得エラー: ${response.getResponseCode()}`);
+      return null;
+    }
+  } catch (e) {
+    Logger.log(`Todoist取得例外: ${e}`);
+    return null;
+  }
+}
+
+function deleteTodoistTask(token, todoistId) {
+  try {
+    const response = UrlFetchApp.fetch(`https://api.todoist.com/api/v1/tasks/${todoistId}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+      muteHttpExceptions: true
+    });
+    if (response.getResponseCode() !== 204) {
+      Logger.log(`Todoist削除エラー: ${response.getResponseCode()}`);
+    }
+  } catch (e) {
+    Logger.log(`Todoist削除例外: ${e}`);
+  }
+}
+
+// ============================================================
+// ユーティリティ
+// ============================================================
+
+function extractTodoistId(notes) {
+  if (!notes) return null;
+  const regex = /\[todoist:([^\]]+)\]/;
+  const match = notes.match(regex);
+  return match ? match[1] : null;
+}
+
+function removeTodoistIdTag(notes) {
+  if (!notes) return '';
+  return notes.replace(/\n?\[todoist:[^\]]+\]/g, '');
+}
+
+// ============================================================
+// 初回セットアップ確認用（手動で一度実行して確認）
+// ============================================================
+function checkSetup() {
+  const props = PropertiesService.getScriptProperties();
+  const token = props.getProperty('TODOIST_API_TOKEN');
+  Logger.log('TODOIST_API_TOKEN: ' + (token ? '設定済み' : '未設定'));
+  if (!token) return;
+
+  // Google Tasksリスト一覧
+  try {
+    const lists = Tasks.Tasklists.list();
+    Logger.log('\n--- Google Tasks リスト ---');
+    (lists.items || []).forEach(l => Logger.log(`  "${l.title}" (ID: ${l.id})`));
+  } catch (e) {
+    Logger.log('Google Tasks API エラー: サービスが有効化されていない可能性があります');
+  }
+
+  // Todoistプロジェクト一覧
+  const projects = getTodoistProjects(token);
+  Logger.log('\n--- Todoist プロジェクト ---');
+  for (const [name, id] of Object.entries(projects)) {
+    Logger.log(`  "${name}" (ID: ${id})`);
+  }
+
+  // マッチング結果
+  const googleTaskLists = getGoogleTaskLists();
+  const mapping = buildListMapping(googleTaskLists, projects);
+  Logger.log('\n--- 名前一致マッピング結果 ---');
+  for (const [gtListId, info] of Object.entries(mapping)) {
+    const dest = info.todoistProjectId ? `Todoist: "${info.listName}"` : 'Todoist: Inbox（一致なし）';
+    Logger.log(`  Google Tasks: "${info.listName}" → ${dest}`);
+  }
+}
+```
+
+:::
+
+### 実装のポイント
+
+コードの中で特に意識した点をいくつか補足します。
+
+#### 二重登録の防止
+
+Todoistから同期したタスクには、Google Tasks側のnotesに`[todoist:xxx]`タグが付与されます。
+このタグがあるタスクは、次回のGASサイクルで「既存タスク」として扱われるため、再びTodoistに登録されることはありません。
+逆方向も同様で、Google TasksからTodoistに作成した直後にIDを書き戻すことで、次のサイクルでの重複を防いでいます。
+
+#### 初回実行時の挙動
+
+初回実行時は`PREV_TODOIST_TASK_IDS`が空のため、Todoistの既存タスクが全件Google Tasksに作成されます。
+許容できない場合は、事前にTodoistの既存タスクIDをプロパティに書き込む初期化処理が別途必要になります。
+
+#### ラベル・優先度の同期について
+
+Google Tasksにはラベルや優先度に相当するフィールドがAPIで扱えないため、これらはTodoist側で手動設定する運用としています。
+notesにフォーマットを設けてパースする案も検討しましたが、Geminiが毎回そのフォーマットで書いてくれる再現性が期待できないため断念しました。
 
 ### Gemini連携の制約
 
