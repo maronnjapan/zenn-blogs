@@ -59,10 +59,12 @@ AIとの会話の中で「これ後でやろう」と思うタスクが、あち
 #### Gemini（Google Tasks + GAS経由）
 
 GeminiはTodoistと直接連携できないため、Google Tasksを中継して同期します。
+前提として、以下の記事をもとにTodoist APIを実行するためのトークンを取得してください。
+https://www.todoist.com/ja/help/articles/find-your-api-token-Jpzx9IIlB
 
 1. Google Apps Script（GAS）でプロジェクトを作成
 2. GASエディタの「サービス」から `Tasks API` を追加
-3. 「プロジェクトの設定」→「スクリプトプロパティ」に `TODOIST_API_TOKEN` を追加
+3. 「プロジェクトの設定」→「スクリプトプロパティ」に `TODOIST_API_TOKEN` を追加し、値はTodoist APIを実行するためのトークンを設定
 4. 同期スクリプトをコピーして貼り付け
 5. `checkSetup()` を手動実行して接続確認
 6. `syncTasks()` に時間ベーストリガー（5分ごと）を設定
@@ -303,6 +305,13 @@ ChatGPTの設定画面から、アプリを選択します。
 GeminiとTodoistの連携は、ClaudeやChatGPTほどシンプルにはいきません。
 「できること」と「できないこと」を分けて読んでもらえればと思います。
 
+### 前提：Todoist APIトークンが必要
+
+Gemini連携ではGoogle Apps Script（GAS）からTodoist APIを直接呼び出すため、Todoist APIトークンが必要です。
+トークンの取得方法は以下の公式ヘルプを参照してください。
+
+https://www.todoist.com/ja/help/articles/find-your-api-token-Jpzx9IIlB
+
 ### Geminiを使う理由
 
 NotebookLMとの連携があることが大きいです。
@@ -491,6 +500,8 @@ headers: {
 
 設定完了後は以下のような状態になります。
 ![](/images/ai-task-consolidation-todoist/set-todoist-api-token-property.png)
+
+これでTodoist APIが使えるようになります。
 
 設定が終わったら、`checkSetup()`関数を手動で一度実行してください。
 Google Tasksのリスト一覧、Todoistのプロジェクト一覧、名前一致マッピング結果がログに出力されます。
